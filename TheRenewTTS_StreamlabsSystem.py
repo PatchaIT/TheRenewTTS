@@ -5,14 +5,15 @@
 #           formely was:
 #               TheNewTTS script for Streamlabs Chatbot
 #               Copyright (C) 2020 Luis Sanchez
-# Version: 1.01
+# Version: 1.02
 # Description: Text to speech with Google translate voice,
 #               or your own custom TTS webservice
 # Change: Fixed bug skipping first word on Read ALL,
+#           Fixed a bug with message Cost set to 0,
 #           Allows to force read lowercased or uppercased
 # Services: Twitch, Youtube
 # Overlays: None
-# Update Date: 2023/01/05
+# Update Date: 2023/01/07
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # CHANGELOG:
@@ -83,6 +84,8 @@
 #   2023/01/05 av1.01 -
 #       Fixed bug skipping first word on Read ALL
 #       Allows to force read lowercased or uppercased
+#   2023/01/07 av1.02 -
+#       Fixed a bug with message Cost set to 0
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -115,7 +118,7 @@ Description = "Text to speech with Google translate voice, or your own"\
                 " custom TTS webservice."
 ScriptName = "The Renew TTS"
 Creator = "Patcha (from LuisSanchezDev)"
-Version = "1.01"
+Version = "1.02"
 Website = "https://www.patcha.it"
 
 
@@ -457,11 +460,12 @@ def Execute(data):
                     return
 
                 # check if enough coins
-                if not Parent.RemovePoints(
-                        data.User, data.UserName, SETTINGS.cost):
-                    if SETTINGS.do_msg_cost:
-                        Parent.SendStreamMessage(SETTINGS.msg_cost)
-                    return
+                if SETTINGS.cost > 0:
+                    if not Parent.RemovePoints(
+                            data.User, data.UserName, SETTINGS.cost):
+                        if SETTINGS.do_msg_cost:
+                            Parent.SendStreamMessage(SETTINGS.msg_cost)
+                        return
 
                 # check message
                 if not data.GetParam(1):
@@ -471,7 +475,8 @@ def Execute(data):
 
                 # if message too long
                 if len(text) > MEDIA_MAN.MEDIA_DWNL.get_max_chars():
-                    Parent.AddPoints(data.User, data.UserName, SETTINGS.cost)
+                    if SETTINGS.cost > 0:
+                        Parent.AddPoints(data.User, data.UserName, SETTINGS.cost)
                     if SETTINGS.do_msg_too_long:
                         Parent.SendStreamMessage(
                             SETTINGS.msg_too_long.format(alias_name))
