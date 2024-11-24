@@ -7,6 +7,18 @@
         "tooltip": "Check this to read all chat disregarding the command.\nIF YOU ARE USING THIS FEATURE MAKE SURE TO SET A FAST SPEED SO THE CHATBOT CAN KEEP UP!",
         "group": "General"
     },
+    "tts_case": {
+        "type": "dropdown",
+        "label": "Force lower or upper case",
+        "value": "",
+        "tooltip": "Set this if you want TTS to read lowercase (could avoid acronyms on uppercase words) or uppercase (could read words as acronym).",
+        "items": [
+            "",
+            "Lower",
+            "Upper"
+        ],
+        "group": "General"
+    },
     "tts_clean_repeated_letters": {
         "type": "checkbox",
         "value": true,

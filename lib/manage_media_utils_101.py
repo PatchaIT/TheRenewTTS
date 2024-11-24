@@ -17,6 +17,7 @@
 #
 # Versions:
 #   2022/11/20 v1.0 - First public release
+#   2022/11/27 v1.01 - Adopts tts media utils library v1.02
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -30,7 +31,7 @@ clr.AddReference("System.Web")
 from System.Web import HttpUtility
 from System.Net import WebClient
 
-from tts_media_utils_101 import MediaDownloader, run_cmd
+from tts_media_utils_102 import MediaDownloader, run_cmd
 from play_media_utils_101 import MediaPlayer
 
 # Define Global Variables
@@ -240,7 +241,7 @@ class MediaManager:
 
         if self._valid and self.MEDIA_PLAY and self.MEDIA_DWNL:
             self._texts.append(text)
-            return self.MEDIA_DWNL.getRefText(text)
+            return self.MEDIA_DWNL.get_ref_text(text)
 
         # if ttsXplay_media_utils was invalid at initalization
         Parent.Log(self.__settings["script"],

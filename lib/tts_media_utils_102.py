@@ -26,6 +26,7 @@
 #                      ["a"lternative "v"ersion; no internal player
 #                       + no "skip"]
 #   2022/11/20 av1.01 - First public release, not backwards compatible
+#   2022/11/27 av1.02 - Allows to force read lowercased or uppercased
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -45,7 +46,7 @@ from urlparse import urlparse
 from System.Diagnostics import Process, ProcessStartInfo, ProcessWindowStyle
 
 # Define Global Variables
-global Parent
+global Parent, _defaults, _cases
 
 _defaults = {
     # "script": cannot have a default, must be explicit
@@ -58,6 +59,7 @@ _defaults = {
     "speed": 100,
     "length": 30,
     "timeout": 30,
+    "case": "",
     "clean_rep_lett": True,
     "clean_rep_word": True,
     "max_rep_word": 3,
@@ -76,6 +78,8 @@ _defaults = {
     # "_path": cannot have a default, must be explicit
     # "_cache": cannot have a default, must be explicit
 }
+
+_cases = ["", "Lower", "Upper"]
 
 
 class MediaDownloader:
@@ -119,6 +123,8 @@ class MediaDownloader:
         settings["volume_on"] = self._check_false(settings["volume_on"])
         settings["pitch_on"] = self._check_false(settings["pitch_on"])
         settings["speed_on"] = self._check_false(settings["speed_on"])
+
+        settings["case"] = self._check_in_list(settings["case"], _cases, 0)
 
         settings["clean_rep_lett"] = self._check_false(
                                         settings["clean_rep_lett"])
@@ -179,6 +185,15 @@ class MediaDownloader:
         return (value == True or
                 (isinstance(value, str) and value.lower() == "true")
                 )
+
+
+    # check if the value is included into given list
+    # returns value if in list, otherwise the element on index
+    def _check_in_list(self, value, list, index):
+        if value and list and value not in list:
+            value = list[index]
+
+        return value
 
 
     # creates a list of parameters starting from lang setting and
@@ -292,6 +307,7 @@ class MediaDownloader:
     def get_ref_text(self, text):
         return self.__ref_text(
                                 text,
+                                self.__settings["case"],
                                 self.__settings["clean_urls"],
                                 self.__settings["replace_urls"],
                                 self.__settings["emote_prefix"],
@@ -309,13 +325,21 @@ class MediaDownloader:
 
     # Internal core method to get a reference text from original text,
     #   with max length and chars replacement
-    def __ref_text(self, text, clean_urls = False, replace_urls = "",
+    def __ref_text(self, text, case,
+                        clean_urls = False, replace_urls = "",
                         emote_prefix = "", emote_name_upper = True,
                         clean_rep_word = True, max_rep_word = 3,
                         clean_rep_lett = True, replaces = "",
                         alias_dict = {}, chars_swapping = {},
                         cut_max_chars = True, max_chars = 200):
+
         if text:
+            if case:
+                if case == "Lower":
+                    text = text.lower()
+                elif case == "Upper":
+                    text = text.upper()
+
             if clean_urls:
                 text = self.__clean_urls(text, replace_urls)
 
@@ -424,8 +448,7 @@ class MediaDownloader:
             first = "A-Z"
             if not nameUp:
                 first += "a-z"
-            text = re.sub(r'\b'+prefix+'(['+first+']\w*)', r'\1', text) \
-                    .lower()
+            text = re.sub(r'\b'+prefix+'(['+first+']\w*)', r'\1', text)
         return text
 
 

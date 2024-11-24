@@ -18,12 +18,17 @@ Enjoy.
 ### Warning Notes
 
 Note:  
-If you're migrating from old TheNewTTS script, let's know that
+ If you're migrating from old TheNewTTS script, let's know that
   while most settings are the same, still settings files are no more
   compatible, because all variable names are changed.
  So it's better you note your current settings and then report them on
   the brand new TheRenewTTS script configuration GUI.
  Don't try to use same files from old TheNewTTS script!
+
+Note:  
+ If you're updating from a previous TheReNewTTS script version,
+  you may have to delete old "lib" subdirectory before update,
+  because all releases use new lib versions.
 
 Note for Save Settings:  
  Sometimes Streamlabs Chatbot doesn't trigger ReloadSettings method on new
@@ -39,18 +44,24 @@ Note for Save Settings:
  Anyway, after every Chatbot start or reboot, I always suggest to refresh
   scripts at least once.
 
+Note for Custom TTS:  
+ Obviously you already need to have an existing custom TTS webservice.
+ The script doesn't create a new one for you.
+ It just allows you to use one you already own.
+ Otherwise just keep using Google Translate's TTS as default.
+
 ## In Shorts
 
 - Script: The ReNew TTS script
-- Version: 1.0.0
+- Version: 1.0.1
 - Description: Text to speech with Google translate voice,
    or your own custom TTS webservice
-- Change: Reworked libraries and more options, you can even try to set
-   your own custom TTS webserver
+- Change: Fixed bug skipping first word on Read ALL,
+   Allows to force read lowercased or uppercased
 - Services: Twitch, Youtube
 - Overlays: None
 - Made By: @Patcha_it
-- Update Date: 2022/11/20
+- Update Date: 2023/01/05
 
 ## Changelog
 
@@ -121,6 +132,9 @@ Note for Save Settings:
   - Options to disable volume, pitch and speed alterators
      (useful for custom TTS webserver)
   - Script files rearranged into subfolders
+- 2023/01/05 v1.0.1
+  - Fixed bug skipping first word on Read ALL
+  - Allows to force read lowercased or uppercased
 
 ## Getting Started
 
@@ -152,7 +166,7 @@ For each option I'll note if and what changes there are, compared to the
 
 ### General
 
-> #### Read ALL chat  
+> #### Read ALL chat
 Check this to read all chat disregarding the command.
 
 IF YOU ARE USING THIS FEATURE MAKE SURE TO SET A FAST SPEED
@@ -161,6 +175,12 @@ IF YOU ARE USING THIS FEATURE MAKE SURE TO SET A FAST SPEED
 Also note that this feature may prevent the use of some other options.
 
 [Unchanged]
+
+> #### Force lower or upper case
+Set this if you want TTS to read lowercase (could avoid acronyms
+ reading on uppercase words) or uppercase (could read words as acronym).
+
+[Brand new]
 
 > #### Clean repeated letters
 Prevent repeated letters to be spoken and only speak them twice.
@@ -180,8 +200,8 @@ Before it used to speak them only once, now you can set the a custom amount
  with option below.]
 
 > #### Max words/emotes repeat allowed
-How many times you allow to repeat a word/emote, if the option above
- is enabled.
+How many times you allow to repeat a word/emote, if `Clean repeated
+ words/emotes` option is enabled.
 
 [Brand new]
 
@@ -191,7 +211,7 @@ Prevent links to be spoken and say the replacement text instead.
 [Unchanged]
 
 > #### Replace links with
-If the above option is enabled, links will be replaced with this text.
+If `Clean links` is checked, links will be replaced with this text.
 
 [Unchanged]
 
@@ -203,7 +223,7 @@ Check this to say the username before the message.
 > #### Say this after the username
 Append this text to the username so the TTS makes more sense.
 
-This works only if the above option is enabled, too.
+This option works only if `Say username before message` is enabled, too.
 
 [Unchanged]
 
@@ -223,8 +243,7 @@ For each character in here, replaces each occurrence of it with a
 > #### First emotes' name letter is uppercase, after prefix
 Check this if the first letter of your emotes' name (the first letter
  after your channel prefix) is uppercased.
-
-Checking this flag could help next option (Emote prefix, don't read this)
+Checking this flag could help `Emote prefix, don't read this` option
  to not be too invasive and to create less oddities.
 
 [Brand new]
@@ -265,8 +284,8 @@ Be sure to use the most rich series of characters possible.
 [Brand new]
 
 > #### Cut automatically to Max chars allowed
-Check this to let the system automatically cut text to max characters allowed,
- to be able to play TTS.
+Check this to let the script automatically cut text to max characters
+ allowed, to be able to play TTS anyway.
 
 Otherwise the text will not be read if too long (silently ignored).
 
@@ -554,7 +573,8 @@ Limit the duration the Text To Speach will be speaking.
 [Unchanged]
 
 > #### Settings update confirmation
-Text To Speach will say this sentence to confirm settings are updated successfully.
+Text To Speach will say this sentence to confirm settings are
+ updated successfully.
 
 [Brand new, could not be customized before.]
 
