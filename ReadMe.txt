@@ -53,15 +53,14 @@ Note for Custom TTS:
 ## In Shorts
 
 - Script: The ReNew TTS script
-- Version: 1.0.1
+- Version: 1.0.2
 - Description: Text to speech with Google translate voice,
    or your own custom TTS webservice
-- Change: Fixed bug skipping first word on Read ALL,
-   Allows to force read lowercased or uppercased
+- Change: Fixed a bug with message Cost set to 0
 - Services: Twitch, Youtube
 - Overlays: None
 - Made By: @Patcha_it
-- Update Date: 2023/01/05
+- Update Date: 2023/01/07
 
 ## Changelog
 
@@ -135,6 +134,8 @@ Note for Custom TTS:
 - 2023/01/05 v1.0.1
   - Fixed bug skipping first word on Read ALL
   - Allows to force read lowercased or uppercased
+- 2023/01/07 v1.0.2
+  - Fixed a bug with message Cost set to 0
 
 ## Getting Started
 
@@ -191,7 +192,7 @@ Example: noooooooo -> noo .
 
 > #### Clean repeated words/emotes
 Prevent repeated words/emotes to be spoken and only speak them as max
- as setted in the option below.
+ as setted in the option `Max words/emotes repeat allowed`.
 
 Example: :Kappa: :Kappa: :Kappa: :Kappa: :Kappa: :Kappa: -> :Kappa:
 
