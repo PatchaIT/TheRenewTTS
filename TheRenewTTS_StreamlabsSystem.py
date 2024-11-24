@@ -5,14 +5,14 @@
 #           formely was:
 #               TheNewTTS script for Streamlabs Chatbot
 #               Copyright (C) 2020 Luis Sanchez
-# Version: av1.0
+# Version: 1.01
 # Description: Text to speech with Google translate voice,
 #               or your own custom TTS webservice
-# Change: Reworked libraries and more options, you can even try to set
-#           your own custom TTS webserver
+# Change: Fixed bug skipping first word on Read ALL,
+#           Allows to force read lowercased or uppercased
 # Services: Twitch, Youtube
 # Overlays: None
-# Update Date: 2022/11/20
+# Update Date: 2023/01/05
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # CHANGELOG:
@@ -80,6 +80,9 @@
 #       Options to disable volume, pitch and speed alterators
 #           (useful for custom TTS webserver)
 #       Script files rearranged into subfolders
+#   2023/01/05 av1.01 -
+#       Fixed bug skipping first word on Read ALL
+#       Allows to force read lowercased or uppercased
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -100,7 +103,7 @@ clr.AddReference("IronPython.Modules.dll")
 
 # Add script's folder to path to be able to find the other modules
 sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
-from manage_media_utils_100 import MediaManager, run_cmd
+from manage_media_utils_101 import MediaManager, run_cmd
 from settings_utils_101 import Settings
 from blacklist_utils_100 import Blacklist
 
@@ -112,7 +115,7 @@ Description = "Text to speech with Google translate voice, or your own"\
                 " custom TTS webservice."
 ScriptName = "The Renew TTS"
 Creator = "Patcha (from LuisSanchezDev)"
-Version = "1.0"
+Version = "1.01"
 Website = "https://www.patcha.it"
 
 
@@ -154,6 +157,7 @@ def Init():
     global BOT_ON, DWNL_SET, LIB_PATH
     global PLAY_SET, MAN_SET, MEDIA_MAN
     global BLACKLIST_FILE, BLACKLIST
+    global THE_COMMAND
 
     # Create Settings Directory
     if not os.path.exists(SETTINGS_PATH):
@@ -213,6 +217,7 @@ def Init():
         "tts_speed_on": True,
         "tts_speed": 100,
         "tts_length": 26,
+        "tts_case": "",
         "tts_clean_repeated_letters": True,
         "tts_clean_repeated_words": True,
         "tts_replacement_urls": "link removed",
@@ -233,6 +238,7 @@ def Init():
     }
 
     SETTINGS = Settings(SETTINGS_FILE, DEFAULTS)
+    THE_COMMAND = SETTINGS.command.lower()
 
     cache_folder = os.path.join(LIB_PATH, "cache")
     loop_start = time.time()
@@ -260,6 +266,7 @@ def Init():
         "speed": SETTINGS.tts_speed / 100.0,
         "length": SETTINGS.tts_length,
         "timeout": TIMEOUT,
+        "case": SETTINGS.tts_case,
         "clean_rep_lett": SETTINGS.tts_clean_repeated_letters,
         "clean_rep_word": SETTINGS.tts_clean_repeated_words,
         "max_rep_word": SETTINGS.tts_max_repeated_words,
@@ -389,10 +396,10 @@ def Execute(data):
                 return
 
         # Check text to speak
-        if SETTINGS.read_all_text or command == SETTINGS.command.lower():
+        if SETTINGS.read_all_text or command == THE_COMMAND:
             text = data.Message
             start = text[0]
-            text = re.sub(r'^'+command+' ', '', text, flags=re.IGNORECASE)
+            text = re.sub(r'^'+THE_COMMAND+' ', '', text, flags=re.IGNORECASE)
             text = MEDIA_MAN.MEDIA_DWNL.get_ref_text(text)
 
             # Read the whole chat
@@ -419,7 +426,7 @@ def Execute(data):
                         + text if SETTINGS.say_username else text)
 
             # Read on command
-            elif command == SETTINGS.command.lower():
+            elif command == THE_COMMAND:
                 if not Parent.HasPermission(
                         data.User, SETTINGS.permission, ""):
                     if SETTINGS.do_msg_permission:
@@ -472,7 +479,7 @@ def Execute(data):
 
                 # play message
                 else:
-                    MEDIA_MAN.append(alias_name + " "
+                    media = MEDIA_MAN.append(alias_name + " "
                         + SETTINGS.say_after_username + ": "
                         + text if SETTINGS.say_username else text)
 
