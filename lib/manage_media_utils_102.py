@@ -18,6 +18,10 @@
 # Versions:
 #   2022/11/20 v1.0 - First public release
 #   2022/11/27 v1.01 - Adopts tts media utils library v1.02
+#   2023/01/15 v1.02 -
+#       Added a pause method
+#       Adopts tts media utils library v1.03
+#       Adopts play media utils library v1.02
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -31,8 +35,8 @@ clr.AddReference("System.Web")
 from System.Web import HttpUtility
 from System.Net import WebClient
 
-from tts_media_utils_102 import MediaDownloader, run_cmd
-from play_media_utils_101 import MediaPlayer
+from tts_media_utils_103 import MediaDownloader, run_cmd
+from play_media_utils_102 import MediaPlayer
 
 # Define Global Variables
 global Parent
@@ -133,6 +137,7 @@ class MediaManager:
                             or not self._thread.is_alive()
                             ):
             self._close = False
+            self._paused = False
             self._thread = threading.Thread(
                 target = self._download_and_play_async)
             self._thread.start()
@@ -169,6 +174,25 @@ class MediaManager:
         return
 
 
+    # pause\unpause queue querying
+    def pause(self):
+        self.set_paused(not self._paused)
+        return self._paused
+
+
+    # set paused or unpaused queue querying
+    def set_paused(self, paused):
+        self._paused = paused
+
+        if self.MEDIA_DWNL:
+            self.MEDIA_DWNL.set_paused(paused)
+
+        if self.MEDIA_PLAY:
+            self.MEDIA_PLAY.set_paused(paused)
+
+        return self._paused
+
+
     # thread which will use tts_media_utils to generates TTS from text
     # and play_media_utils to play TTS from requests appended to queue
     def _download_and_play_async(self):
@@ -177,7 +201,7 @@ class MediaManager:
                 if self._close:
                     break
 
-                if self._texts:
+                if self._texts and not self._paused:
                     text = self._texts.pop(0)
 
                     try:

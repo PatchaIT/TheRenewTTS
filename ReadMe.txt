@@ -9,8 +9,8 @@ But when I tried to implement such libraries into my scripts I noticed
 So I started reworking it, I splitted into different libraries, I made
  their threading systems compatible on multiple scripts and so on.
 But then I thought the best and most complete way to put their features
- at work was on the same script where they came from. So that's how it
- ended up I reworking the whole `TheNewTTS script`, creating this
+ at work was on the same script where they came from. So that's how I
+ ended up reworking the whole `TheNewTTS script` and creating this
  `TheRenewTTS script` version.
 
 Enjoy.
@@ -53,14 +53,14 @@ Note for Custom TTS:
 ## In Shorts
 
 - Script: The ReNew TTS script
-- Version: 1.0.2
+- Version: 1.0.3
 - Description: Text to speech with Google translate voice,
    or your own custom TTS webservice
-- Change: Fixed a bug with message Cost set to 0
+- Change: Added a customizable !pause command
 - Services: Twitch, Youtube
 - Overlays: None
 - Made By: @Patcha_it
-- Update Date: 2023/01/07
+- Update Date: 2023/01/15
 
 ## Changelog
 
@@ -136,6 +136,8 @@ Note for Custom TTS:
   - Allows to force read lowercased or uppercased
 - 2023/01/07 v1.0.2
   - Fixed a bug with message Cost set to 0
+- 2023/01/15 v1.0.3
+  - Added a customizable !pause command
 
 ## Getting Started
 
@@ -434,6 +436,13 @@ Use this command to skip the whole text to speech queue, for any reason,
 
 [Brand new]
 
+> #### Pauses\Unpauses the script
+Use this command to pause or unpause the script.
+
+Note: if the TTS is already reading, it will still finish the current reading.
+
+[Brand new]
+
 > #### Add user to blacklist command
 Use this command to add an user to the blacklist
 
@@ -467,6 +476,29 @@ Message shown when moderator forget to specify the target user.
 {0} is where the command name will go.
 
 [Brand new, could not be customized before.]
+
+> #### TTS paused
+Check this to shown a message when TTS is paused with pause command.
+
+[Brand new]
+
+
+> #### TTS paused message
+Message shown when moderator paused TTS with pause command.
+
+[Brand new]
+
+
+> #### TTS unpaused
+Check this to shown a message when TTS is unpaused with pause command.
+
+[Brand new]
+
+
+> #### TTS unpaused message
+Message shown when moderator unpaused TTS with pause command.
+
+[Brand new]
 
 > #### Successfully blacklisted
 Check this to shown when moderator succeed to ban an user.

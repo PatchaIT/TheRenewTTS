@@ -5,15 +5,16 @@
 #           formely was:
 #               TheNewTTS script for Streamlabs Chatbot
 #               Copyright (C) 2020 Luis Sanchez
-# Version: 1.02
+# Version: 1.03
 # Description: Text to speech with Google translate voice,
 #               or your own custom TTS webservice
 # Change: Fixed bug skipping first word on Read ALL,
-#           Fixed a bug with message Cost set to 0,
-#           Allows to force read lowercased or uppercased
+#         Fixed a bug with message Cost set to 0,
+#         Allows to force read lowercased or uppercased,
+#         Added a customizable !pause command
 # Services: Twitch, Youtube
 # Overlays: None
-# Update Date: 2023/01/07
+# Update Date: 2023/01/15
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # CHANGELOG:
@@ -84,8 +85,8 @@
 #   2023/01/05 av1.01 -
 #       Fixed bug skipping first word on Read ALL
 #       Allows to force read lowercased or uppercased
-#   2023/01/07 av1.02 -
-#       Fixed a bug with message Cost set to 0
+#   2023/01/07 av1.02 - Fixed a bug with message Cost set to 0
+#   2023/01/15 av1.03 - Added a customizable !pause command
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -106,7 +107,7 @@ clr.AddReference("IronPython.Modules.dll")
 
 # Add script's folder to path to be able to find the other modules
 sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
-from manage_media_utils_101 import MediaManager, run_cmd
+from manage_media_utils_102 import MediaManager, run_cmd
 from settings_utils_101 import Settings
 from blacklist_utils_100 import Blacklist
 
@@ -118,7 +119,7 @@ Description = "Text to speech with Google translate voice, or your own"\
                 " custom TTS webservice."
 ScriptName = "The Renew TTS"
 Creator = "Patcha (from LuisSanchezDev)"
-Version = "1.02"
+Version = "1.03"
 Website = "https://www.patcha.it"
 
 
@@ -160,7 +161,7 @@ def Init():
     global BOT_ON, DWNL_SET, LIB_PATH
     global PLAY_SET, MAN_SET, MEDIA_MAN
     global BLACKLIST_FILE, BLACKLIST
-    global THE_COMMAND
+    global THE_COMMAND, PAUSED
 
     # Create Settings Directory
     if not os.path.exists(SETTINGS_PATH):
@@ -199,14 +200,19 @@ def Init():
         "cmd_skip": "!ttskip",
         "cmd_skipnext": "!ttskipnext",
         "cmd_skipall": "!ttskipall",
+        "cmd_pause": "!ttspause",
         "moderator_permission": "Caster",
         "mod_bannable": False,
         "do_msg_missing_target": True,
+        "do_msg_paused": True,
+        "do_msg_unpaused": True,
         "do_msg_blacklisted_success": True,
         "do_msg_blacklisted_unsuccess": True,
         "do_msg_unbanned_success": True,
         "do_msg_unbanned_unsuccess": True,
         "msg_missing_target": "Usage: {0} <username>",
+        "msg_paused": "TTS paused.",
+        "msg_unpaused": "TTS unpaused.",
         "msg_blacklisted_success": "{0} successfully blacklisted!",
         "msg_blacklisted_unsuccess": "{0} already blacklisted!",
         "msg_unbanned_success": "{0} removed from blacklist!",
@@ -242,6 +248,7 @@ def Init():
 
     SETTINGS = Settings(SETTINGS_FILE, DEFAULTS)
     THE_COMMAND = SETTINGS.command.lower()
+    PAUSED = False
 
     cache_folder = os.path.join(LIB_PATH, "cache")
     loop_start = time.time()
@@ -316,6 +323,8 @@ def Init():
 #   [Required] Execute Data / Process messages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def Execute(data):
+    global PAUSED
+
     # Check if message is valid, and not making this script work from Discord
     if data.IsChatMessage() and not data.IsFromDiscord():
 
@@ -344,14 +353,23 @@ def Execute(data):
                     MEDIA_MAN.MEDIA_PLAY.skip()
                 return
 
-            #   skip next
+            # skip next
             elif command == SETTINGS.cmd_skipnext.lower():
                 MEDIA_MAN.MEDIA_PLAY.skip_next()
                 return
 
-            #   skip all
+            # skip all
             elif command == SETTINGS.cmd_skipall.lower():
                 MEDIA_MAN.MEDIA_PLAY.skip_all()
+                return
+
+            # pause
+            elif command == SETTINGS.cmd_pause.lower():
+                PAUSED = MEDIA_MAN.pause()
+                if PAUSED and SETTINGS.do_msg_paused:
+                    Parent.SendStreamMessage(SETTINGS.msg_paused)
+                elif not PAUSED and SETTINGS.do_msg_unpaused:
+                    Parent.SendStreamMessage(SETTINGS.msg_unpaused)
                 return
 
             # ban
@@ -399,7 +417,7 @@ def Execute(data):
                 return
 
         # Check text to speak
-        if SETTINGS.read_all_text or command == THE_COMMAND:
+        if not PAUSED and (SETTINGS.read_all_text or command == THE_COMMAND):
             text = data.Message
             start = text[0]
             text = re.sub(r'^'+THE_COMMAND+' ', '', text, flags=re.IGNORECASE)
