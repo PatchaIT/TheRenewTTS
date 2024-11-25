@@ -90,14 +90,17 @@ Note for Custom TTS:
 ## In Shorts
 
 - Script: The ReNew TTS script
-- Version: 1.0.3
+- Version: 1.0.4
 - Description: Text to speech with Google translate voice,
    or your own custom TTS webservice
-- Change: Added a customizable !pause command
+- Change: Fixed a bug with Blacklist file loading;
+   Fixed a bug with TTS stuttering aliases with spaces;
+   Added permission level VIP (includes subscribers and moderators);
+   Added setting to keep or not keep queing on pause
 - Services: Twitch, Youtube
 - Overlays: None
 - Made By: @Patcha_it
-- Update Date: 2023/01/15
+- Update Date: 2023/01/24
 
 ## Changelog
 
@@ -175,6 +178,11 @@ Note for Custom TTS:
   - Fixed a bug with message Cost set to 0
 - 2023/01/15 v1.0.3
   - Added a customizable !pause command
+- 2023/01/24 v1.0.4
+  - Fixed a bug with Blacklist file loading
+  - Fixed a bug with TTS stuttering aliases with spaces
+  - Added permission level VIP (includes subscribers and moderators)
+  - Added setting to keep or not keep queing on pause
 
 ## Getting Started
 
@@ -480,6 +488,24 @@ Note: if the TTS is already reading, it will still finish the current reading.
 
 [Brand new]
 
+> #### Keep queuing on pause
+Check this to keep queuing new TTS messages even if you paused the script.
+
+All queued messages will be read sequentially after unpaused, you can still
+ skip them with skip commands.
+
+Note: if the TTS is already reading, it will still finish the current reading.
+
+[Brand new]
+
+> #### Keep\Unkeep queuing on pause
+Switches and reswitches settings for "Keep queuing on pause" flag,
+ only for the current session.
+
+Next session will start as for setting on flag "Keep queuing on pause".
+
+[Brand new]
+
 > #### Add user to blacklist command
 Use this command to add an user to the blacklist
 
@@ -519,21 +545,42 @@ Check this to shown a message when TTS is paused with pause command.
 
 [Brand new]
 
-
 > #### TTS paused message
 Message shown when moderator paused TTS with pause command.
 
 [Brand new]
-
 
 > #### TTS unpaused
 Check this to shown a message when TTS is unpaused with pause command.
 
 [Brand new]
 
-
 > #### TTS unpaused message
 Message shown when moderator unpaused TTS with pause command.
+
+[Brand new]
+
+> #### TTS keeps queuing on pause
+  Check this to shown a message when TTS keeps queuing on pause
+    after keep command.
+
+[Brand new]
+
+> #### TTS keeps queuing on pause message
+  Message shown when moderator set TTS to keeping queuing on pause
+    after keep command.
+
+[Brand new]
+
+> #### TTS stops queuing on pause
+  Check this to shown a message when TTS keeps stops queuing on pause
+    after keep command.
+
+[Brand new]
+
+> #### TTS stops queuing on pause message
+  Message shown when moderator set TTS to stop queuing on pause
+    after keep command.
 
 [Brand new]
 

@@ -143,11 +143,12 @@
         "items": [
             "Everyone",
             "Regular",
+            "VIP",
             "Subscriber",
             "Moderator",
             "Editor"
         ],
-        "label": "Permission level",
+        "label": "Minimum permission level",
         "tooltip": "Set the permission level for the command.",
         "group": "Command configuration"
     },
@@ -298,6 +299,20 @@
         "tooltip": "Use this command to pause or unpause the script.\nNote: if the TTS is already reading, it will still finish the current reading.",
         "group": "Moderator commands"
     },
+    "do_keep": {
+        "type": "checkbox",
+        "value": true,
+        "label": "Keep queuing on pause",
+        "tooltip": "Check this to keep queuing new TTS messages even if you paused the script.\nAll queued messages will be read sequentially after unpaused, you can still skip them with skip commands.",
+        "group": "Moderator commands"
+    },
+    "cmd_keep": {
+        "type": "textbox",
+        "value": "!ttskeep",
+        "label": "Keep\\Unkeep queuing on pause.",
+        "tooltip": "Use this command to keep queuing or not TTS messages while the script is paused.\nNote: this command changes the setting only for current session. Next session will start as for general settings flag.",
+        "group": "Moderator commands"
+    },
     "cmd_ban": {
         "type": "textbox",
         "value": "!ttsban",
@@ -371,6 +386,34 @@
         "value": "TTS unpaused.",
         "label": "TTS unpaused message",
         "tooltip": "Message shown when moderator unpaused TTS with pause command.",
+        "group": "Moderator commands message"
+    },
+    "do_msg_keep": {
+        "type": "checkbox",
+        "value": true,
+        "label": "TTS keeps queuing on pause",
+        "tooltip": "Check this to shown a message when TTS keeps queuing on pause after keep command.",
+        "group": "Moderator commands message"
+    },
+    "msg_keep": {
+        "type": "textbox",
+        "value": "TTS keeps queuing on pause.",
+        "label": "TTS keeps queuing on pause message",
+        "tooltip": "Message shown when moderator set TTS to keeping queuing on pause after keep command.",
+        "group": "Moderator commands message"
+    },
+    "do_msg_unkeep": {
+        "type": "checkbox",
+        "value": true,
+        "label": "TTS stops queuing on pause",
+        "tooltip": "Check this to shown a message when TTS keeps stops queuing on pause after keep command.",
+        "group": "Moderator commands message"
+    },
+    "msg_unkeep": {
+        "type": "textbox",
+        "value": "TTS stops queuing on pause.",
+        "label": "TTS stops queuing on pause message",
+        "tooltip": "Message shown when moderator set TTS to stop queuing on pause after keep command.",
         "group": "Moderator commands message"
     },
     "do_msg_blacklisted_success": {

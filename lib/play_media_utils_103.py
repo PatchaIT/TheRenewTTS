@@ -26,6 +26,7 @@
 #                      ["a"lternative "v"ersion; only the audio player]
 #   2022/11/20 av1.01 - First public release, not backwards compatible
 #   2023/01/15 av1.02 - Added a pause method
+#   2023/01/24 av1.03 - Added setting to keep or not keep queing on pause
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -65,6 +66,7 @@ class MediaPlayer:
         self.__settings = self.__settings_check(settings)
         self.__skip = set()
         self.__to_clean = set()
+        self._keep = self.__settings["keep"]
 
         self.__start()
 
@@ -146,6 +148,28 @@ class MediaPlayer:
     def set_paused(self, paused):
         self._paused = paused
         return self._paused
+
+
+    # get the pause status of queue querying
+    def is_paused(self):
+        return self._paused
+
+
+    # keep\unkeep queuing on pause
+    def keep(self):
+        self.set_keep_queuing(not self._keep)
+        return self._keep
+
+
+    # set keep or unkeep queuing on pause
+    def set_keep_queuing(self, keep):
+        self._keep = keep
+        return self._keep
+
+
+    # get the keep queuing setting on pause
+    def is_keep_queuing(self):
+        return self._keep
 
 
     # thread which generates TTS from text appended to queue
@@ -234,16 +258,23 @@ class MediaPlayer:
 
 
     # append audio file with info, to play it as soon as possible
+    # returns True if succeeded to append
+    #   or False if nothing was appended
     def append(self, file_path, text = None):
-        self._audios.append([file_path, text if text else None])
-        return
+
+        if not self._paused or self._keep:
+            self._audios.append([file_path, text if text else None])
+            return True
+
+        else:
+            return False
 
 
     # append audio file with info, to play it as soon as possible
     def append_play_clean(self, file_path, text = None):
 
-        self.append(file_path, text)
-        self.clean(file_path)
+        if self.append(file_path, text):
+            self.clean(file_path)
 
         return
 

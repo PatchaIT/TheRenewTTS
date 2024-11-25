@@ -22,6 +22,10 @@
 #       Added a pause method
 #       Adopts tts media utils library v1.03
 #       Adopts play media utils library v1.02
+#   2023/01/24 av1.03 -
+#       Added setting to keep or not keep queing on pause
+#       Adopts tts media utils library v1.04
+#       Adopts play media utils library v1.03
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -35,8 +39,8 @@ clr.AddReference("System.Web")
 from System.Web import HttpUtility
 from System.Net import WebClient
 
-from tts_media_utils_103 import MediaDownloader, run_cmd
-from play_media_utils_102 import MediaPlayer
+from tts_media_utils_104 import MediaDownloader, run_cmd
+from play_media_utils_103 import MediaPlayer
 
 # Define Global Variables
 global Parent
@@ -63,6 +67,7 @@ class MediaManager:
         self._thread = None
 
         self.__settings = self.__settings_check(settings)
+        self._keep = self.__settings["keep"]
 
         self.MEDIA_DWNL = None
         self.MEDIA_PLAY = None
@@ -193,6 +198,35 @@ class MediaManager:
         return self._paused
 
 
+    # get the pause status of queue querying
+    def is_paused(self):
+        return self._paused
+
+
+    # keep\unkeep queuing on pause
+    def keep(self):
+        self.set_keep_queuing(not self._keep)
+        return self._keep
+
+
+    # set keep or unkeep queuing on pause
+    def set_keep_queuing(self, keep):
+        self._keep = keep
+
+        if self.MEDIA_DWNL:
+            self.MEDIA_DWNL.set_keep_queuing(keep)
+
+        if self.MEDIA_PLAY:
+            self.MEDIA_PLAY.set_keep_queuing(keep)
+
+        return self._keep
+
+
+    # get the keep queuing setting on pause
+    def is_keep_queuing(self):
+        return self._keep
+
+
     # thread which will use tts_media_utils to generates TTS from text
     # and play_media_utils to play TTS from requests appended to queue
     def _download_and_play_async(self):
@@ -261,11 +295,16 @@ class MediaManager:
     #   replacements by setup
     # returns a preview of the new reference text, eventually cut to
     #   usually 200 chars max and with replaced chars
+    #   or empty string if nothing was appended
     def append(self, text):
 
         if self._valid and self.MEDIA_PLAY and self.MEDIA_DWNL:
-            self._texts.append(text)
-            return self.MEDIA_DWNL.get_ref_text(text)
+            if not self._paused or self._keep:
+                self._texts.append(text)
+                return self.MEDIA_DWNL.get_ref_text(text)
+
+            else:
+                return ""
 
         # if ttsXplay_media_utils was invalid at initalization
         Parent.Log(self.__settings["script"],
