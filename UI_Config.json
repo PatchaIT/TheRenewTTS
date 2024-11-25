@@ -11,7 +11,7 @@
         "type": "dropdown",
         "label": "Force lower or upper case",
         "value": "",
-        "tooltip": "Set this if you want TTS to read lowercase (could avoid acronyms on uppercase words) or uppercase (could read words as acronym).",
+        "tooltip": "Set this if you want TTS to read lowercase (could avoid acronyms reading on uppercase words) or uppercase (could read words as acronym).",
         "items": [
             "",
             "Lower",
@@ -291,6 +291,13 @@
         "tooltip": "Use this command to skip the whole texts queue, for any reason, like going to close the session.",
         "group": "Moderator commands"
     },
+    "cmd_pause": {
+        "type": "textbox",
+        "value": "!ttspause",
+        "label": "Pauses\\Unpauses the script.",
+        "tooltip": "Use this command to pause or unpause the script.\nNote: if the TTS is already reading, it will still finish the current reading.",
+        "group": "Moderator commands"
+    },
     "cmd_ban": {
         "type": "textbox",
         "value": "!ttsban",
@@ -336,6 +343,34 @@
         "value": "Usage: {0} <username>",
         "label": "Missing target message",
         "tooltip": "Message shown when moderator forget to specify the target user. {0} is where the command will go.",
+        "group": "Moderator commands message"
+    },
+    "do_msg_paused": {
+        "type": "checkbox",
+        "value": true,
+        "label": "TTS paused",
+        "tooltip": "Check this to shown a message when TTS is paused with pause command.",
+        "group": "Moderator commands message"
+    },
+    "msg_paused": {
+        "type": "textbox",
+        "value": "TTS paused.",
+        "label": "TTS paused message",
+        "tooltip": "Message shown when moderator paused TTS with pause command.",
+        "group": "Moderator commands message"
+    },
+    "do_msg_unpaused": {
+        "type": "checkbox",
+        "value": true,
+        "label": "TTS unpaused",
+        "tooltip": "Check this to shown a message when TTS is unpaused with pause command.",
+        "group": "Moderator commands message"
+    },
+    "msg_unpaused": {
+        "type": "textbox",
+        "value": "TTS unpaused.",
+        "label": "TTS unpaused message",
+        "tooltip": "Message shown when moderator unpaused TTS with pause command.",
         "group": "Moderator commands message"
     },
     "do_msg_blacklisted_success": {

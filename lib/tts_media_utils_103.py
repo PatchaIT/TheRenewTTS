@@ -27,6 +27,7 @@
 #                       + no "skip"]
 #   2022/11/20 av1.01 - First public release, not backwards compatible
 #   2022/11/27 av1.02 - Allows to force read lowercased or uppercased
+#   2023/01/15 av1.03 - Added a pause method
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -213,6 +214,7 @@ class MediaDownloader:
                 or not self._thread.is_alive()
             ):
             self._close = False
+            self._paused = False
             self._thread = threading.Thread(target=self._download_async)
             self._thread.start()
         return
@@ -242,6 +244,18 @@ class MediaDownloader:
         return
 
 
+    # pause\unpause queue querying
+    def pause(self):
+        self.set_paused(not self._paused)
+        return self._paused
+
+
+    # set paused or unpaused queue querying
+    def set_paused(self, paused):
+        self._paused = paused
+        return self._paused
+
+
     # thread which generates TTS from text appended to queue
     def _download_async(self):
         try:
@@ -249,7 +263,7 @@ class MediaDownloader:
                 if self._close:
                     break
 
-                if self._texts:
+                if self._texts and not self._paused:
                     text = self._texts.pop(0)
 
                     if len(text) <= self.get_max_chars():
