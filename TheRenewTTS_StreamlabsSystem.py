@@ -5,16 +5,16 @@
 #           formely was:
 #               TheNewTTS script for Streamlabs Chatbot
 #               Copyright (C) 2020 Luis Sanchez
-# Version: 1.03
+# Version: 1.04
 # Description: Text to speech with Google translate voice,
 #               or your own custom TTS webservice
-# Change: Fixed bug skipping first word on Read ALL,
-#         Fixed a bug with message Cost set to 0,
-#         Allows to force read lowercased or uppercased,
-#         Added a customizable !pause command
+# Change: Fixed a bug with Blacklist file loading
+#       Fixed a bug with TTS stuttering aliases with spaces
+#       Added permission level VIP (includes subscribers and moderators)
+#       Added setting to keep or not keep queing on pause
 # Services: Twitch, Youtube
 # Overlays: None
-# Update Date: 2023/01/15
+# Update Date: 2023/01/24
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # CHANGELOG:
@@ -87,6 +87,11 @@
 #       Allows to force read lowercased or uppercased
 #   2023/01/07 av1.02 - Fixed a bug with message Cost set to 0
 #   2023/01/15 av1.03 - Added a customizable !pause command
+#   2023/01/24 av1.04 -
+#       Fixed a bug with Blacklist file loading
+#       Fixed a bug with TTS stuttering aliases with spaces
+#       Added permission level VIP (includes subscribers and moderators)
+#       Added setting to keep or not keep queing on pause
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -107,9 +112,9 @@ clr.AddReference("IronPython.Modules.dll")
 
 # Add script's folder to path to be able to find the other modules
 sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
-from manage_media_utils_102 import MediaManager, run_cmd
+from manage_media_utils_103 import MediaManager, run_cmd
 from settings_utils_101 import Settings
-from blacklist_utils_100 import Blacklist
+from blacklist_utils_101 import Blacklist
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -119,7 +124,7 @@ Description = "Text to speech with Google translate voice, or your own"\
                 " custom TTS webservice."
 ScriptName = "The Renew TTS"
 Creator = "Patcha (from LuisSanchezDev)"
-Version = "1.03"
+Version = "1.04"
 Website = "https://www.patcha.it"
 
 
@@ -161,7 +166,7 @@ def Init():
     global BOT_ON, DWNL_SET, LIB_PATH
     global PLAY_SET, MAN_SET, MEDIA_MAN
     global BLACKLIST_FILE, BLACKLIST
-    global THE_COMMAND, PAUSED
+    global THE_COMMAND, PAUSED, KEEP
 
     # Create Settings Directory
     if not os.path.exists(SETTINGS_PATH):
@@ -201,11 +206,15 @@ def Init():
         "cmd_skipnext": "!ttskipnext",
         "cmd_skipall": "!ttskipall",
         "cmd_pause": "!ttspause",
+        "do_keep": False,
+        "cmd_keep": "!ttskeep",
         "moderator_permission": "Caster",
         "mod_bannable": False,
         "do_msg_missing_target": True,
         "do_msg_paused": True,
         "do_msg_unpaused": True,
+        "do_msg_keep": True,
+        "do_msg_unkeep": True,
         "do_msg_blacklisted_success": True,
         "do_msg_blacklisted_unsuccess": True,
         "do_msg_unbanned_success": True,
@@ -213,6 +222,8 @@ def Init():
         "msg_missing_target": "Usage: {0} <username>",
         "msg_paused": "TTS paused.",
         "msg_unpaused": "TTS unpaused.",
+        "msg_keep": "TTS keeps queuing on pause.",
+        "msg_unkeep": "TTS stops queuing on pause.",
         "msg_blacklisted_success": "{0} successfully blacklisted!",
         "msg_blacklisted_unsuccess": "{0} already blacklisted!",
         "msg_unbanned_success": "{0} removed from blacklist!",
@@ -249,6 +260,10 @@ def Init():
     SETTINGS = Settings(SETTINGS_FILE, DEFAULTS)
     THE_COMMAND = SETTINGS.command.lower()
     PAUSED = False
+    KEEP = SETTINGS.do_keep
+
+    if SETTINGS.permission == "VIP":
+        SETTINGS.permission = "VIP+"
 
     cache_folder = os.path.join(LIB_PATH, "cache")
     loop_start = time.time()
@@ -276,6 +291,7 @@ def Init():
         "speed": SETTINGS.tts_speed / 100.0,
         "length": SETTINGS.tts_length,
         "timeout": TIMEOUT,
+        "keep": SETTINGS.do_keep,
         "case": SETTINGS.tts_case,
         "clean_rep_lett": SETTINGS.tts_clean_repeated_letters,
         "clean_rep_word": SETTINGS.tts_clean_repeated_words,
@@ -293,7 +309,7 @@ def Init():
         "webservice": SETTINGS.tts_webservice,
         "audio_format" : SETTINGS.tts_audio_format,
         "_path": LIB_PATH,
-        "_cache": cache_folder
+        "_cache": cache_folder,
     }
 
     # PLAY settings: length and timeout are in seconds
@@ -301,6 +317,7 @@ def Init():
         "script": SCRIPT_NAME,
         "length": SETTINGS.tts_length,
         "timeout": TIMEOUT,
+        "keep": SETTINGS.do_keep,
     }
 
     # Save on TTS bot resources and threads, if bot is not enabled
@@ -309,8 +326,9 @@ def Init():
         MAN_SET = {
             "script": SCRIPT_NAME,
             "timeout": TIMEOUT,
+            "keep": SETTINGS.do_keep,
             "MEDIA_DWNL": DWNL_SET,
-            "MEDIA_PLAY": PLAY_SET
+            "MEDIA_PLAY": PLAY_SET,
         }
         MEDIA_MAN = MediaManager(MAN_SET)
 
@@ -323,7 +341,7 @@ def Init():
 #   [Required] Execute Data / Process messages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def Execute(data):
-    global PAUSED
+    global PAUSED, KEEP
 
     # Check if message is valid, and not making this script work from Discord
     if data.IsChatMessage() and not data.IsFromDiscord():
@@ -372,6 +390,15 @@ def Execute(data):
                     Parent.SendStreamMessage(SETTINGS.msg_unpaused)
                 return
 
+            # keep queuing on pause
+            elif command == SETTINGS.cmd_keep.lower():
+                KEEP = MEDIA_MAN.keep()
+                if KEEP and SETTINGS.do_msg_keep:
+                    Parent.SendStreamMessage(SETTINGS.msg_keep)
+                elif not KEEP and SETTINGS.do_msg_unkeep:
+                    Parent.SendStreamMessage(SETTINGS.msg_unkeep)
+                return
+
             # ban
             elif command == SETTINGS.cmd_ban.lower():
                 if data.GetParamCount() != 2:
@@ -417,100 +444,101 @@ def Execute(data):
                 return
 
         # Check text to speak
-        if not PAUSED and (SETTINGS.read_all_text or command == THE_COMMAND):
-            text = data.Message
-            start = text[0]
-            text = re.sub(r'^'+THE_COMMAND+' ', '', text, flags=re.IGNORECASE)
-            text = MEDIA_MAN.MEDIA_DWNL.get_ref_text(text)
+        if SETTINGS.read_all_text or command == THE_COMMAND:
+            if not PAUSED or KEEP:
+                text = data.Message
+                start = text[0]
+                text = re.sub(r'^'+THE_COMMAND+' ', '', text, flags=re.IGNORECASE)
+                text = MEDIA_MAN.MEDIA_DWNL.get_ref_text(text)
 
-            # Read the whole chat
-            if SETTINGS.read_all_text:
+                # Read the whole chat
+                if SETTINGS.read_all_text:
 
-                # check if banned
-                if BLACKLIST.is_user_blacklisted(user_name):
-                    return
-
-                # check if starts with characters to ignore
-                if start in SETTINGS.ignore_starting_with:
-                    return
-
-                # check length
-                if len(text) > MEDIA_MAN.MEDIA_DWNL.get_max_chars():
-                    if SETTINGS.do_msg_too_long:
-                        MEDIA_MAN.append(
-                            SETTINGS.msg_too_long.format(alias_name))
-
-                # play message
-                else:
-                    MEDIA_MAN.append(alias_name + " "
-                        + SETTINGS.say_after_username + ": "
-                        + text if SETTINGS.say_username else text)
-
-            # Read on command
-            elif command == THE_COMMAND:
-                if not Parent.HasPermission(
-                        data.User, SETTINGS.permission, ""):
-                    if SETTINGS.do_msg_permission:
-                        Parent.SendStreamMessage(SETTINGS.msg_permission)
-                    return
-
-                # check if banned
-                if BLACKLIST.is_user_blacklisted(user_name):
-                    if (SETTINGS.do_msg_blacklisted):
-                        Parent.SendStreamMessage(
-                            SETTINGS.msg_blacklisted.format(alias_name))
-                    return
-
-                # check user's cooldown
-                if (SETTINGS.user_cooldown and
-                        Parent.GetUserCooldownDuration(
-                            ScriptName, SETTINGS.command, data.User)):
-                    if SETTINGS.do_msg_user_cooldown:
-                        Parent.SendStreamMessage(SETTINGS.msg_user_cooldown)
-                    return
-
-                # check command's cooldown
-                if (SETTINGS.cooldown and
-                        Parent.GetCooldownDuration(
-                            ScriptName, SETTINGS.command)):
-                    if SETTINGS.do_msg_cooldown:
-                        Parent.SendStreamMessage(SETTINGS.msg_cooldown)
-                    return
-
-                # check if enough coins
-                if SETTINGS.cost > 0:
-                    if not Parent.RemovePoints(
-                            data.User, data.UserName, SETTINGS.cost):
-                        if SETTINGS.do_msg_cost:
-                            Parent.SendStreamMessage(SETTINGS.msg_cost)
+                    # check if banned
+                    if BLACKLIST.is_user_blacklisted(user_name):
                         return
 
-                # check message
-                if not data.GetParam(1):
-                    if SETTINGS.do_msg_missing_text:
-                        Parent.SendStreamMessage(SETTINGS.msg_missing_text)
-                    return
+                    # check if starts with characters to ignore
+                    if start in SETTINGS.ignore_starting_with:
+                        return
 
-                # if message too long
-                if len(text) > MEDIA_MAN.MEDIA_DWNL.get_max_chars():
+                    # check length, speak error only if not paused (no queing)
+                    if len(text) > MEDIA_MAN.MEDIA_DWNL.get_max_chars():
+                        if SETTINGS.do_msg_too_long and not MEDIA_MAN.is_paused():
+                            MEDIA_MAN.append(
+                                SETTINGS.msg_too_long.format(alias_name))
+
+                    # play message
+                    else:
+                        MEDIA_MAN.append(alias_name + " "
+                            + SETTINGS.say_after_username + ": "
+                            + text if SETTINGS.say_username else text)
+
+                # Read on command
+                elif command == THE_COMMAND:
+                    if not Parent.HasPermission(
+                            data.User, SETTINGS.permission, ""):
+                        if SETTINGS.do_msg_permission:
+                            Parent.SendStreamMessage(SETTINGS.msg_permission)
+                        return
+
+                    # check if banned
+                    if BLACKLIST.is_user_blacklisted(user_name):
+                        if (SETTINGS.do_msg_blacklisted):
+                            Parent.SendStreamMessage(
+                                SETTINGS.msg_blacklisted.format(alias_name))
+                        return
+
+                    # check user's cooldown
+                    if (SETTINGS.user_cooldown and
+                            Parent.GetUserCooldownDuration(
+                                ScriptName, SETTINGS.command, data.User)):
+                        if SETTINGS.do_msg_user_cooldown:
+                            Parent.SendStreamMessage(SETTINGS.msg_user_cooldown)
+                        return
+
+                    # check command's cooldown
+                    if (SETTINGS.cooldown and
+                            Parent.GetCooldownDuration(
+                                ScriptName, SETTINGS.command)):
+                        if SETTINGS.do_msg_cooldown:
+                            Parent.SendStreamMessage(SETTINGS.msg_cooldown)
+                        return
+
+                    # check if enough coins
                     if SETTINGS.cost > 0:
-                        Parent.AddPoints(data.User, data.UserName, SETTINGS.cost)
-                    if SETTINGS.do_msg_too_long:
-                        Parent.SendStreamMessage(
-                            SETTINGS.msg_too_long.format(alias_name))
-                    return
+                        if not Parent.RemovePoints(
+                                data.User, data.UserName, SETTINGS.cost):
+                            if SETTINGS.do_msg_cost:
+                                Parent.SendStreamMessage(SETTINGS.msg_cost)
+                            return
 
-                # play message
-                else:
-                    media = MEDIA_MAN.append(alias_name + " "
-                        + SETTINGS.say_after_username + ": "
-                        + text if SETTINGS.say_username else text)
+                    # check message
+                    if not data.GetParam(1):
+                        if SETTINGS.do_msg_missing_text:
+                            Parent.SendStreamMessage(SETTINGS.msg_missing_text)
+                        return
 
-                # apply cooldowns
-                Parent.AddCooldown(ScriptName,
-                    SETTINGS.command, SETTINGS.cooldown)
-                Parent.AddUserCooldown(ScriptName,
-                    SETTINGS.command, data.User, SETTINGS.user_cooldown)
+                    # if message too long
+                    if len(text) > MEDIA_MAN.MEDIA_DWNL.get_max_chars():
+                        if SETTINGS.cost > 0:
+                            Parent.AddPoints(data.User, data.UserName, SETTINGS.cost)
+                        if SETTINGS.do_msg_too_long:
+                            Parent.SendStreamMessage(
+                                SETTINGS.msg_too_long.format(alias_name))
+                        return
+
+                    # play message
+                    else:
+                        media = MEDIA_MAN.append(alias_name + " "
+                            + SETTINGS.say_after_username + ": "
+                            + text if SETTINGS.say_username else text)
+
+                    # apply cooldowns
+                    Parent.AddCooldown(ScriptName,
+                        SETTINGS.command, SETTINGS.cooldown)
+                    Parent.AddUserCooldown(ScriptName,
+                        SETTINGS.command, data.User, SETTINGS.user_cooldown)
 
     return
 

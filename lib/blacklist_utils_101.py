@@ -17,6 +17,7 @@
 # Versions:
 #   2022/11/20 v1.0 - Extracted from Luis Sanchez's TheNewTTS script
 #                       (extraction by Patcha)
+#   2023/01/24 v1.01 - Fixed a bug with lowercasing loaded data
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -89,8 +90,7 @@ class Blacklist:
     def _normalize(self):
         db = self._load()
         if db:
-            new_db = {key.lower():value.lower() \
-                        for key, value in db.items()}
+            new_db = [value.lower() for value in db]
             self._save(new_db)
         return
 

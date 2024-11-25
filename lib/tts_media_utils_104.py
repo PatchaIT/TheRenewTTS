@@ -28,6 +28,9 @@
 #   2022/11/20 av1.01 - First public release, not backwards compatible
 #   2022/11/27 av1.02 - Allows to force read lowercased or uppercased
 #   2023/01/15 av1.03 - Added a pause method
+#   2023/01/24 av1.04 -
+#       Fixed a bug with TTS stuttering aliases with spaces
+#       Added setting to keep or not keep queing on pause
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -95,6 +98,8 @@ class MediaDownloader:
         self._thread = None
 
         self.__settings = self.__settings_check(settings)
+        self._keep = self.__settings["keep"]
+
         self.__start()
 
 
@@ -256,6 +261,28 @@ class MediaDownloader:
         return self._paused
 
 
+    # get the pause status of queue querying
+    def is_paused(self):
+        return self._paused
+
+
+    # keep\unkeep queuing on pause
+    def keep(self):
+        self.set_keep_queuing(not self._keep)
+        return self._keep
+
+
+    # set keep or unkeep queuing on pause
+    def set_keep_queuing(self, keep):
+        self._keep = keep
+        return self._keep
+
+
+    # get the keep queuing setting on pause
+    def is_keep_queuing(self):
+        return self._keep
+
+
     # thread which generates TTS from text appended to queue
     def _download_async(self):
         try:
@@ -308,10 +335,14 @@ class MediaDownloader:
     #   it usually cuts to 200 chars max and apply chars replacements
     #   by setup
     # returns the new reference text, eventually with cuts and replaces
+    #   or empty string if nothing was appended
     def append(self, text):
 
-        text = self.get_ref_text(text)
-        self._texts.append(text)
+        if not self._paused or self._keep:
+            text = self.get_ref_text(text)
+            self._texts.append(text)
+        else:
+            return ""
 
         return text
 
@@ -400,7 +431,7 @@ class MediaDownloader:
     #   letting them be repeated only "max" times
     def __clean_repeated_words(self, text, max):
         if text:
-            text = re.sub(r"\s+", ' ', text.replace(":", " "))
+            text = re.sub(r"\s+", ' ', text)
             max = 3 if not max else int(max)
 
             pattern = '(\s\w+)\\1{' + str(max) + ',}'
@@ -422,6 +453,7 @@ class MediaDownloader:
                             text,
                             flags=re.IGNORECASE
                             )
+                text = re.sub(r'\\(.)', r'\1', text)
         return text
 
 
@@ -582,11 +614,13 @@ class MediaDownloader:
     #   with chars replacements.
     def append_and_play(self, text):
         text = self.append(text)
-        path = self.get_now(text)
 
-        if path:
-            self.play(path)
-            self.clean(path)
+        if text:
+            path = self.get_now(text)
+
+            if path:
+                self.play(path)
+                self.clean(path)
 
         return text
 
@@ -596,6 +630,7 @@ class MediaDownloader:
     #   aka: "Word:Alias".
     # returns a dictionary where Elements (or Words) are keys,
     #   and Correspondences (or Aliases) are values.
+    #"cazzo:pipiricchio (come sei volgare);patcha_it:paccia;DiioPorco:Nome brutto"
     @staticmethod
     def parse_alias_list(alias_list):
         # split all word:alias couples by semicolon
