@@ -17,15 +17,10 @@
 #
 # Versions:
 #   2022/11/20 v1.0 - First public release
-#   2022/11/27 v1.01 - Adopts tts media utils library v1.02
-#   2023/01/15 v1.02 -
-#       Added a pause method
-#       Adopts tts media utils library v1.03
-#       Adopts play media utils library v1.02
-#   2023/01/24 av1.03 -
-#       Added setting to keep or not keep queing on pause
-#       Adopts tts media utils library v1.04
-#       Adopts play media utils library v1.03
+#   2022/11/27 v1.01 - Allows to force read lowercased or uppercased
+#   2023/01/15 v1.02 - Added a pause method (in tts library)
+#   2023/01/24 av1.03 - Added setting to keep or not queing on pause
+#   2023/01/27 av1.04 - Adopts scripts utils library v.1.0
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -39,8 +34,10 @@ clr.AddReference("System.Web")
 from System.Web import HttpUtility
 from System.Net import WebClient
 
-from tts_media_utils_104 import MediaDownloader, run_cmd
-from play_media_utils_103 import MediaPlayer
+from tts_media_utils_105 import MediaDownloader
+from play_media_utils_104 import MediaPlayer
+from scripts_utils_100 import get_parent
+
 
 # Define Global Variables
 global Parent
@@ -310,15 +307,3 @@ class MediaManager:
         Parent.Log(self.__settings["script"],
             "ttsXplay append: This Media_Manager is not valid.")
         return "invalid for " + text
-
-
-import System
-clr.AddReference([
-        asbly for asbly in System.AppDomain.CurrentDomain.GetAssemblies()
-        if "AnkhBotR2" in str(asbly)
-    ][0])
-
-
-import AnkhBotR2
-def get_parent():
-    return AnkhBotR2.Managers.PythonManager()

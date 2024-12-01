@@ -31,6 +31,9 @@
 #   2023/01/24 av1.04 -
 #       Fixed a bug with TTS stuttering aliases with spaces
 #       Added setting to keep or not keep queing on pause
+#   2023/01/24 av1.05 -
+#       Removed typo oddity into a comment
+#       Exported utility functions into dedicated new library
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -43,11 +46,8 @@ import re
 # Required to download the audio files
 clr.AddReference("System.Web")
 from System.Web import HttpUtility
-from System.Net import WebClient
-from urlparse import urlparse
 
-# Required to run cmd commands without a window and wait for the result
-from System.Diagnostics import Process, ProcessStartInfo, ProcessWindowStyle
+from scripts_utils_100 import *
 
 # Define Global Variables
 global Parent, _defaults, _cases
@@ -138,9 +138,9 @@ class MediaDownloader:
                                         settings["clean_rep_word"])
         settings["max_rep_word"] = int(self._float_check(
                                         settings["max_rep_word"], 3))
-        settings["alias_list"] = MediaDownloader.parse_alias_list(
+        settings["alias_list"] = parse_alias_list(
                                         settings["alias_list"])
-        settings["chars_swapping"] = MediaDownloader.parse_alias_list(
+        settings["chars_swapping"] = parse_alias_list(
                                         settings["chars_swapping"])
         settings["clean_urls"] = self._check_false(settings["clean_urls"])
 
@@ -313,7 +313,7 @@ class MediaDownloader:
 
                             if self._close:
                                 break
-                            file_path = process_tts(file_path,
+                            file_path = process_media(file_path,
                                                     self.__settings)
 
                             self._audios.append([file_path, text])
@@ -623,106 +623,3 @@ class MediaDownloader:
                 self.clean(path)
 
         return text
-
-
-    # parse a list of corresponding element,
-    #   formatted this way "Element:Correspondence",
-    #   aka: "Word:Alias".
-    # returns a dictionary where Elements (or Words) are keys,
-    #   and Correspondences (or Aliases) are values.
-    #"cazzo:pipiricchio (come sei volgare);patcha_it:paccia;DiioPorco:Nome brutto"
-    @staticmethod
-    def parse_alias_list(alias_list):
-        # split all word:alias couples by semicolon
-        alias_list = alias_list.split(";")
-        # split word and alias by colon
-        alias_list = [x.split(":") for x in alias_list]
-
-        new_alias_dict = {}
-        for s in alias_list:
-            if s and s[0]:  # no empty keys are allowed
-                if len(s) < 2:
-                    s.append("")
-                new_alias_dict[s[0].strip()] = s[1]
-
-        return new_alias_dict
-
-
-# Download from chosen voice generator webservice using defined
-#   TTS settings
-def download_tts(file_path, webservice, params):
-    with WebClient() as wc:
-        try:
-            url = webservice.format(*params)
-            parse = urlparse(url)
-            wc.Headers["Referer"] = (
-                                        parse.scheme + "://"
-                                        + parse.netloc + "/"
-                                    )
-            wc.Headers["User-Agent"] = "Chrome/104.0 (Linux; Android 10)"
-            wc.DownloadFile(url, file_path)
-
-        except Exception as e:
-            Parent.Log("download_tts",
-                "Error reaching TTS webservice > " + str(e))
-    return
-
-
-# Changes the pitch, speed and volume of downloaded audio file
-def process_tts(file_path, settings):
-    try:
-        temp_mp3 = os.path.join(os.path.dirname(file_path), "processing.mp3")
-
-        af = []
-        if settings["pitch_on"]:
-            af.append("asetrate=24000*{0}".format(settings["pitch"]))
-        if settings["speed_on"]:
-            af.append("atempo={0}/{1}".format(
-                                            settings["speed"],
-                                            settings["pitch"])
-                                            )
-        if settings["volume_on"]:
-            af.append("volume={0}".format(settings["volume"]))
-        af = "" if not af else "-af " + ",".join(af)
-
-        commands = [
-            'cd "{0}"'.format(settings["_path"]),
-            'ffmpeg.exe -t {0} -i "{1}" {2} "{3}" -y'.format(
-                settings["length"],
-                file_path,
-                af,
-                temp_mp3
-            ),
-            'del "{0}"'.format(file_path),
-        ]
-        run_cmd(" & ".join(commands))
-
-        if not file_path.endswith(".mp3"):
-            os.path.splitext(file_path)[0] + ".mp3"
-        run_cmd('move "{0}" "{1}"'.format(temp_mp3, file_path))
-
-    except Exception as e:
-        Parent.Log("process_tts", "Error processing TTS file > " + str(e))
-    return file_path
-
-
-def run_cmd(command):
-    pinfo = ProcessStartInfo()
-    pinfo.FileName = "cmd.exe"
-    pinfo.WindowStyle = ProcessWindowStyle.Hidden;
-    pinfo.Arguments = "/C" + command
-    cmd = Process.Start(pinfo)
-    cmd.WaitForExit()
-    return
-
-
-import System
-clr.AddReference([
-        asbly for asbly in System.AppDomain.CurrentDomain.GetAssemblies()
-        if "AnkhBotR2" in str(asbly)
-    ][0])
-
-
-import AnkhBotR2
-def get_parent():
-    return AnkhBotR2.Managers.PythonManager()

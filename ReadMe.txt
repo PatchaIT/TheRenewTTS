@@ -53,7 +53,7 @@ Note for Custom TTS:
 ## In Shorts
 
 - Script: The ReNew TTS script
-- Version: 1.0.4
+- Version: 1.0.5
 - Description: Text to speech with Google translate voice,
    or your own custom TTS webservice
 - Change: Fixed a bug with Blacklist file loading;
@@ -63,7 +63,7 @@ Note for Custom TTS:
 - Services: Twitch, Youtube
 - Overlays: None
 - Made By: @Patcha_it
-- Update Date: 2023/01/24
+- Update Date: 2023/01/27
 
 ## Changelog
 
@@ -146,6 +146,9 @@ Note for Custom TTS:
   - Fixed a bug with TTS stuttering aliases with spaces
   - Added permission level VIP (includes subscribers and moderators)
   - Added setting to keep or not keep queing on pause
+- 2023/01/27 v1.0.5
+  - Removed typo oddity into a comment
+  - Exported utility functions into dedicated new library
 
 ## Getting Started
 

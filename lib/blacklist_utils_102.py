@@ -18,13 +18,16 @@
 #   2022/11/20 v1.0 - Extracted from Luis Sanchez's TheNewTTS script
 #                       (extraction by Patcha)
 #   2023/01/24 v1.01 - Fixed a bug with lowercasing loaded data
+#   2023/01/27 v1.02 - Exported utility functions into
+#                       dedicated new library
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import os
-import clr
 import json
 import codecs
+
+from scripts_utils_100 import strip_username, get_parent
 
 
 class Blacklist:
@@ -39,7 +42,7 @@ class Blacklist:
 
 
     def add_user(self, user_name):
-        user_name = Blacklist.strip_username(user_name)
+        user_name = strip_username(user_name)
         if self.is_user_blacklisted(user_name):
             return False
 
@@ -50,7 +53,7 @@ class Blacklist:
 
 
     def remove_user(self, user_name):
-        user_name = Blacklist.strip_username(user_name)
+        user_name = strip_username(user_name)
         if not self.is_user_blacklisted(user_name):
             return False
 
@@ -61,7 +64,7 @@ class Blacklist:
 
 
     def is_user_blacklisted(self, user_name):
-        user_name = Blacklist.strip_username(user_name)
+        user_name = strip_username(user_name)
         return user_name in self._db
 
 
@@ -93,23 +96,3 @@ class Blacklist:
             new_db = [value.lower() for value in db]
             self._save(new_db)
         return
-
-
-    @staticmethod
-    def strip_username(user_name):
-        user_name = user_name.lower()
-        if "@" in user_name:
-            user_name = user_name.replace("@","")
-        return user_name
-
-
-import System
-clr.AddReference([
-        asbly for asbly in System.AppDomain.CurrentDomain.GetAssemblies()
-        if "AnkhBotR2" in str(asbly)
-    ][0])
-
-
-import AnkhBotR2
-def get_parent():
-    return AnkhBotR2.Managers.PythonManager()
