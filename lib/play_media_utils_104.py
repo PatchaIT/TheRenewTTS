@@ -26,7 +26,10 @@
 #                      ["a"lternative "v"ersion; only the audio player]
 #   2022/11/20 av1.01 - First public release, not backwards compatible
 #   2023/01/15 av1.02 - Added a pause method
-#   2023/01/24 av1.03 - Added setting to keep or not keep queing on pause
+#   2023/01/24 av1.03 - Added setting to keep or
+#                           not keep queing on pause
+#   2023/01/27 av1.04 - Exported utility functions into
+#                           dedicated new library
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -40,8 +43,7 @@ clr.AddReference("NAudio")
 import NAudio
 from NAudio.Wave import AudioFileReader, WaveOutEvent, PlaybackState
 
-# Required to run cmd commands without a window and wait for the result
-from System.Diagnostics import Process, ProcessStartInfo, ProcessWindowStyle
+from scripts_utils_100 import run_cmd, get_parent
 
 # Define Global Variables
 global Parent
@@ -388,25 +390,3 @@ class MediaPlayer:
         if self._audios:
             return tuple(zip(*self._audios))[0]
         return tuple()
-
-
-def run_cmd(command):
-    pinfo = ProcessStartInfo()
-    pinfo.FileName = "cmd.exe"
-    pinfo.WindowStyle = ProcessWindowStyle.Hidden;
-    pinfo.Arguments = "/C" + command
-    cmd = Process.Start(pinfo)
-    cmd.WaitForExit()
-    return
-
-
-import System
-clr.AddReference([
-        asbly for asbly in System.AppDomain.CurrentDomain.GetAssemblies()
-        if "AnkhBotR2" in str(asbly)
-    ][0])
-
-
-import AnkhBotR2
-def get_parent():
-    return AnkhBotR2.Managers.PythonManager()

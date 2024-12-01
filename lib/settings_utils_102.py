@@ -18,15 +18,16 @@
 # Versions:
 #   2022/10/15 v1.0 - Initial release as separate library
 #   2022/11/20 v1.01 - First public release, not backwards compatible
+#   2023/01/27 v1.02 - Exported utility functions into
+#                       dedicated new library
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-import sys
 import os
-import clr
 import codecs
 import json
-import os
+
+from scripts_utils_100 import get_parent
 
 # Define Global Variables
 global Parent
@@ -109,15 +110,3 @@ class Settings:
                     )
 
         return
-
-
-import System
-clr.AddReference([
-        asbly for asbly in System.AppDomain.CurrentDomain.GetAssemblies()
-        if "AnkhBotR2" in str(asbly)
-    ][0])
-
-
-import AnkhBotR2
-def get_parent():
-    return AnkhBotR2.Managers.PythonManager()

@@ -5,7 +5,7 @@
 #           formely was:
 #               TheNewTTS script for Streamlabs Chatbot
 #               Copyright (C) 2020 Luis Sanchez
-# Version: 1.04
+# Version: 1.05
 # Description: Text to speech with Google translate voice,
 #               or your own custom TTS webservice
 # Change: Fixed a bug with Blacklist file loading
@@ -14,7 +14,7 @@
 #       Added setting to keep or not keep queing on pause
 # Services: Twitch, Youtube
 # Overlays: None
-# Update Date: 2023/01/24
+# Update Date: 2023/01/27
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # CHANGELOG:
@@ -92,6 +92,9 @@
 #       Fixed a bug with TTS stuttering aliases with spaces
 #       Added permission level VIP (includes subscribers and moderators)
 #       Added setting to keep or not keep queing on pause
+#   2023/01/27 av1.05 -
+#       Removed typo oddity into a comment
+#       Exported utility functions into dedicated new library
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -112,9 +115,10 @@ clr.AddReference("IronPython.Modules.dll")
 
 # Add script's folder to path to be able to find the other modules
 sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
-from manage_media_utils_103 import MediaManager, run_cmd
-from settings_utils_101 import Settings
-from blacklist_utils_101 import Blacklist
+from manage_media_utils_104 import MediaManager
+from settings_utils_102 import Settings
+from blacklist_utils_102 import Blacklist
+from scripts_utils_100 import run_cmd
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -124,7 +128,7 @@ Description = "Text to speech with Google translate voice, or your own"\
                 " custom TTS webservice."
 ScriptName = "The Renew TTS"
 Creator = "Patcha (from LuisSanchezDev)"
-Version = "1.04"
+Version = "1.05"
 Website = "https://www.patcha.it"
 
 
