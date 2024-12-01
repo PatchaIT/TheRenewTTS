@@ -56,10 +56,8 @@ Note for Custom TTS:
 - Version: 1.0.5
 - Description: Text to speech with Google translate voice,
    or your own custom TTS webservice
-- Change: Fixed a bug with Blacklist file loading;
-   Fixed a bug with TTS stuttering aliases with spaces;
-   Added permission level VIP (includes subscribers and moderators);
-   Added setting to keep or not keep queing on pause
+- Change: Removed typo oddity into a comment;
+   Exported utility functions into dedicated new library
 - Services: Twitch, Youtube
 - Overlays: None
 - Made By: @Patcha_it
