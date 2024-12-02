@@ -30,6 +30,9 @@
 #                           not keep queing on pause
 #   2023/01/27 av1.04 - Exported utility functions into
 #                           dedicated new library
+#   2023/02/01 av1.05 -
+#       Flag to preview textually in chat the reading text
+#               if you use "append" or "append_play_clean" methods
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -43,7 +46,7 @@ clr.AddReference("NAudio")
 import NAudio
 from NAudio.Wave import AudioFileReader, WaveOutEvent, PlaybackState
 
-from scripts_utils_100 import run_cmd, get_parent
+from scripts_utils_101 import *
 
 # Define Global Variables
 global Parent
@@ -51,7 +54,9 @@ global Parent
 _defaults = {
     # "script": cannot have a default, must be explicit
     "length": 30,
-    "timeout": 30
+    "timeout": 30,
+    "keep": False,
+    "preview": False,
 }
 
 
@@ -77,8 +82,9 @@ class MediaPlayer:
     # returns settings with checked voices
     def __settings_check(self, settings):
         settings = self.__check_defaults(settings)
-        settings["length"] = int(self._float_check(settings["length"], 30))
-        settings["timeout"] = int(self._float_check(settings["timeout"], 30))
+        settings["length"] = int(float_check(settings["length"], 30))
+        settings["timeout"] = int(float_check(settings["timeout"], 30))
+        settings["preview"] = check_false(settings["preview"])
         return settings
 
 
@@ -88,18 +94,8 @@ class MediaPlayer:
     def __check_defaults(self, settings):
         for set in _defaults:
             if not set in settings:
-                self.settings[set] = defaults[set]
+                settings[set] = _defaults[set]
         return settings
-
-
-    # check if the value could be a valid float, and return it casted
-    #   to float
-    # if not, returns the given default
-    def _float_check(self, value, default):
-        try:
-            return float(value)
-        except:
-            return default
 
 
     # start thread
@@ -185,6 +181,10 @@ class MediaPlayer:
                     audio = self._audios.pop(0)
                     self._file_path = audio[0]
                     text = audio[1]
+                    preview = audio[2]
+
+                    if preview is not True and preview is not False:
+                        preview = self.__settings["preview"]
 
                     try:
                         started_playing = time.time()
@@ -214,6 +214,9 @@ class MediaPlayer:
                                         break
 
                                     time.sleep(0.1)
+
+                                if text and preview and not self.__skip:
+                                    Parent.SendStreamMessage(text)
 
                     except Exception as e:
                         Parent.Log(self.__settings["script"],
@@ -262,10 +265,10 @@ class MediaPlayer:
     # append audio file with info, to play it as soon as possible
     # returns True if succeeded to append
     #   or False if nothing was appended
-    def append(self, file_path, text = None):
+    def append(self, file_path, text = None, preview = None):
 
         if not self._paused or self._keep:
-            self._audios.append([file_path, text if text else None])
+            self._audios.append([file_path, text if text else None, preview])
             return True
 
         else:
@@ -273,9 +276,9 @@ class MediaPlayer:
 
 
     # append audio file with info, to play it as soon as possible
-    def append_play_clean(self, file_path, text = None):
+    def append_play_clean(self, file_path, text = None, preview = None):
 
-        if self.append(file_path, text):
+        if self.append(file_path, text, preview):
             self.clean(file_path)
 
         return

@@ -31,6 +31,7 @@ TheRenewTTS
   * [Moderator Commands](#moderator-commands)
   * [Moderator Commands Messages](#moderator-commands-messages)
   * [TTS Configuration](#tts-configuration)
+  * [TTS Multi Languages](#tts-multi-languages)
   * [TTS Server](#tts-server)
 
 ## About The Project
@@ -90,15 +91,17 @@ Note for Custom TTS:
 ## In Shorts
 
 - Script: The ReNew TTS script
-- Version: 1.0.5
+- Version: 1.0.6
 - Description: Text to speech with Google translate voice,
    or your own custom TTS webservice
-- Change: Removed typo oddity into a comment;
-   Exported utility functions into dedicated new library
+- Change: Flag to preview textually in chat the reading text;
+   Channel owner doesn't need to pay anymore to use TTS;
+   Possibility to allow choosing TTS language into chat command:
+     more info below
 - Services: Twitch, Youtube
 - Overlays: None
 - Made By: @Patcha_it
-- Update Date: 2023/01/27
+- Update Date: 2023/07/30
 
 ## Changelog
 
@@ -184,6 +187,10 @@ Note for Custom TTS:
 - 2023/01/27 v1.0.5
   - Removed typo oddity into a comment
   - Exported utility functions into dedicated new library
+- 2023/07/30 v1.0.6
+  - Flag to preview textually in chat the reading text
+  - Channel owner doesn't need to pay anymore to use TTS
+  - Possibility to allow choosing TTS language into chat command
 
 ## Getting Started
 
@@ -213,6 +220,14 @@ Don't be scared about so many options, most of them are not mandatory to be
 For each option I'll note if and what changes there are, compared to the
  original TheNewTTS script settings from Luis Sanchez.
 
+Note:  
+ From version 1.06, I'll no long note in square brackets
+  what changed compared to original TheNewTTS script settings
+  from Luis Sanchez.  
+ If you're very curious about that, you'll have to find the readMe of
+  an older version.  
+ Sorry, but I found this facilitates readability.
+
 ### General
 
 > #### Read ALL chat
@@ -223,20 +238,14 @@ IF YOU ARE USING THIS FEATURE MAKE SURE TO SET A FAST SPEED
 
 Also note that this feature may prevent the use of some other options.
 
-[Unchanged]
-
 > #### Force lower or upper case
 Set this if you want TTS to read lowercase (could avoid acronyms
  reading on uppercase words) or uppercase (could read words as acronym).
-
-[Brand new]
 
 > #### Clean repeated letters
 Prevent repeated letters to be spoken and only speak them twice.
 
 Example: noooooooo -> noo .
-
-[Before it used to speak them once, i.e.: noooo -> no .]
 
 > #### Clean repeated words/emotes
 Prevent repeated words/emotes to be spoken and only speak them as max
@@ -244,58 +253,31 @@ Prevent repeated words/emotes to be spoken and only speak them as max
 
 Example: :Kappa: :Kappa: :Kappa: :Kappa: :Kappa: :Kappa: -> :Kappa:
 
-[Before it used to remove all punctuation, now punctuation is preserved.  
-Before it used to speak them only once, now you can set the a custom amount
- with option below.]
-
 > #### Max words/emotes repeat allowed
 How many times you allow to repeat a word/emote, if `Clean repeated
  words/emotes` option is enabled.
 
-[Brand new]
-
 > #### Clean links
 Prevent links to be spoken and say the replacement text instead.
-
-[Unchanged]
 
 > #### Replace links with
 If `Clean links` is checked, links will be replaced with this text.
 
-[Unchanged]
-
 > #### Say username before message
 Check this to say the username before the message.
-
-[Unchanged]
 
 > #### Say this after the username
 Append this text to the username so the TTS makes more sense.
 
 This option works only if `Say username before message` is enabled, too.
 
-[Unchanged]
-
 > #### Ignore messages starting with
 Ignore messages starting with any of these characters to prevent
  commands being spoken.
 
-[Before it accepted a single character, now it accept multiple chars
- and it will check each of them.]
-
 > #### Replace these with spaces
 For each character in here, replaces each occurrence of it with a
  white space, so TTS will not read them literally.
-
-[Brand new]
-
-> #### First emotes' name letter is uppercase, after prefix
-Check this if the first letter of your emotes' name (the first letter
- after your channel prefix) is uppercased.
-Checking this flag could help `Emote prefix, don't read this` option
- to not be too invasive and to create less oddities.
-
-[Brand new]
 
 > #### Emote prefix, don't read this
 If you want to read your own channel emotes name as words and skip prefix,
@@ -304,11 +286,16 @@ If you want to read your own channel emotes name as words and skip prefix,
 Be sure it is not a common char sequence used in your TTS, otherwise
  it would became mute at any occurrence, also outside emotes' name.  
 It is case sensitive.  
-Setting the option `First emotes' name letter is uppercase` could help.
+Setting the option `First emotes' name letter is uppercase, after prefix`
+ could help.
 
 Left empty if you don't want to use this option.
 
-[Brand new]
+> #### First emotes' name letter is uppercase, after prefix
+Check this if the first letter of your emotes' name (the first letter
+ after your channel prefix) is uppercased.
+Checking this flag could help `Emote prefix, don't read this` option
+ to not be too invasive and to create less oddities.
 
 > #### Alias to apply to words or nicknames
 You can set aliases for words or nicknames (only full words, no partials),
@@ -317,8 +304,6 @@ Expressed with 'Word:Alias' or 'Name:Alias' couples separated by semicolon.
 
 Note1: It also applies on 'Say username' option.  
 Note2: Blacklist checks will be made on original nicknames.
-
-[Brand new]
 
 > #### Character series to swap
 Swaps series of characters with another series, if you want them to be
@@ -330,20 +315,14 @@ Note: at the contrary of aliases, as for the option above, this option
  and create oddities.  
 Be sure to use the most rich series of characters possible.
 
-[Brand new]
-
 > #### Cut automatically to Max chars allowed
 Check this to let the script automatically cut text to max characters
  allowed, to be able to play TTS anyway.
 
 Otherwise the text will not be read if too long (silently ignored).
 
-[Brand new: before it always discarded longer texts.]
-
 > #### Max chars allowed
 Max characters allowed to submit to TTS.
-
-[Brand new: before it was always 200.]
 
 ### Command Configuration
 
@@ -351,27 +330,24 @@ Max characters allowed to submit to TTS.
 Command for users to write in chat to say something with TTS.  
 Aka: the chat command which activate this TTS script.
 
-[Unchanged]
-
 > #### Permission level
 Set the permission level necessary to be enabled to use the command.
-
-[Unchanged]
 
 > #### Global cooldown (seconds)
 Cooldown applied globally to everybody after the command is used.
 
-[Unchanged]
-
 > #### User cooldown (seconds)
 Cooldown applied for each user after he/she used the command.
 
-[Unchanged]
-
 > #### Cost
-Command cost.
+Command cost for users.
 
-[Unchanged]
+Note:  
+ From version 1.06 this applies no more to the channel owner itself.  
+ But due to a bug, some version of the Chatbot need a refresh on the
+  scripts section (the icon with a circled arrow on top right) after
+  bot's startup, otherwise it will not be able to recognize channel name.
+
 
 ### Command Messages
 
@@ -379,85 +355,57 @@ Command cost.
 Check this to shown a message when someone tries to issue the command
  without a text to be read.
 
-[Brand new, was always on before.]
-
 > #### Missing text message
 Message shown when someone tries to issue the command without a text
  to be read.
-
-[Brand new, could not be customized before.]
 
 > #### Permissions
 Check this to shown a message when someone tries to issue the command
  without enough permissions.
 
-[Brand new, was always on before.]
-
 > #### Permissions message
 Message shown when someone tries to issue the command without enough
  permissions.
-
-[Unchanged]
 
 > #### Cooldown
 Check this to shown a message when someone tries to issue the command but
  it is still on cooldown.
 
-[Brand new, was always on before.]
-
 > #### Cooldown message
 Message shown when someone tries to issue the command but it is still on
  cooldown.
-
-[Unchanged]
 
 > #### User Cooldown
 Check this to shown a message when someone tries to issue the command
  while they are on cooldown.
 
-[Brand new, was always on before.]
-
 > #### User Cooldown message
 Message shown when someone tries to issue the command while they are on
  cooldown.
-
-[Unchanged]
 
 > #### Cost
 Check this to shown a message when someone tries to issue the command
  without enough points.
 
-[Brand new, was always on before.]
-
 > #### Cost message
 Message shown when someone tries to issue the command without enough points.
-
-[Unchanged]
 
 > #### Too long
 Check this to shown a message when someone tries to issue the command with
  a message too long.
-
-[Brand new, was always on before.]
 
 > #### Too long message
 Message shown when someone tries to issue the command with a message too long.
 
 {0} is where user's nickname will go.
 
-[Brand new, could not be customized before.]
-
 > #### Blacklisted
 Check this to shown a message when someone banned tries to issue a command.
-
-[Brand new, was always on before.]
 
 > #### Blacklisted message
 Message shown when someone banned tries to issue a command.
 
 {0} is where user's nickname will go.
-
-[Brand new, could not be customized before.]
 
 ### Moderator Commands
 
@@ -468,26 +416,18 @@ Use this command to skip the currently playing text to speech,
 You can even skip all texts in queue containing a reference word,
  if any word is specified after the command.
 
-[Before it couldn't use an argument to skip all text containing a reference word.]
-
 > #### Skip next text command in queue, without need the current one ends up.
 Use this command to skip the next text to speech in queue, like in case
  of a troll, without need to wait the current one to ends up.
-
-[Brand new]
 
 > #### Skip the whole text command queue, and start a new one.
 Use this command to skip the whole text to speech queue, for any reason,
  like going to close the session.
 
-[Brand new]
-
 > #### Pauses\Unpauses the script
 Use this command to pause or unpause the script.
 
 Note: if the TTS is already reading, it will still finish the current reading.
-
-[Brand new]
 
 > #### Keep queuing on pause
 Check this to keep queuing new TTS messages even if you paused the script.
@@ -497,148 +437,98 @@ All queued messages will be read sequentially after unpaused, you can still
 
 Note: if the TTS is already reading, it will still finish the current reading.
 
-[Brand new]
-
 > #### Keep\Unkeep queuing on pause
 Switches and reswitches settings for "Keep queuing on pause" flag,
  only for the current session.
 
 Next session will start as for setting on flag "Keep queuing on pause".
 
-[Brand new]
-
 > #### Add user to blacklist command
 Use this command to add an user to the blacklist
-
-[No more case sensitive]
 
 > #### Remove user from blacklist command
 Use this command to remove an user from the blacklist
 
-[No more case sensitive]
-
 > #### Moderator permission
 Allow these users to blacklist/unblacklist people
 
-[Unchanged]
-
 > #### Allow bannable moderators
 Check this to make any moderator bannable from using Moderator commands.
-
-[Brand new]
 
 ### Moderator Commands Messages
 
 > #### Missing target
 Check this to shown when moderator forget to specify the target user.
 
-[Brand new, was always on before.]
-
 > #### Missing target message
 Message shown when moderator forget to specify the target user.
 
 {0} is where the command name will go.
 
-[Brand new, could not be customized before.]
-
 > #### TTS paused
 Check this to shown a message when TTS is paused with pause command.
-
-[Brand new]
 
 > #### TTS paused message
 Message shown when moderator paused TTS with pause command.
 
-[Brand new]
-
 > #### TTS unpaused
 Check this to shown a message when TTS is unpaused with pause command.
 
-[Brand new]
-
 > #### TTS unpaused message
 Message shown when moderator unpaused TTS with pause command.
-
-[Brand new]
 
 > #### TTS keeps queuing on pause
   Check this to shown a message when TTS keeps queuing on pause
     after keep command.
 
-[Brand new]
-
 > #### TTS keeps queuing on pause message
   Message shown when moderator set TTS to keeping queuing on pause
     after keep command.
-
-[Brand new]
 
 > #### TTS stops queuing on pause
   Check this to shown a message when TTS keeps stops queuing on pause
     after keep command.
 
-[Brand new]
-
 > #### TTS stops queuing on pause message
   Message shown when moderator set TTS to stop queuing on pause
     after keep command.
 
-[Brand new]
-
 > #### Successfully blacklisted
 Check this to shown when moderator succeed to ban an user.
-
-[Brand new, was always on before.]
 
 > #### Successfully blacklisted message
 Message shown when moderator succeed to ban an user.
 
 {0} is where user's nickname will go.
 
-[Brand new, could not be customized before.]
-
 > #### Unsuccessfully blacklisted
 Check this to shown when moderator tries to ban an already banned user.
-
-[Brand new, was always on before.]
 
 > #### Unsuccessfully blacklisted message
 Message shown when moderator tries to ban an already banned user.
 
 {0} is where user's nickname will go.
 
-[Brand new, could not be customized before.]
-
 > #### Successfully unbanned
 Check this to shown when moderator succeed to unban an user.
-
-[Brand new, was always on before.]
 
 > #### Successfully unbanned message
 Message shown when moderator succeed to unban an user.
 
 {0} is where user's nickname will go.
 
-[Brand new, could not be customized before.]
-
 > #### Unsuccessfully unbanned
 Check this to shown when moderator tries to ban a not banned user.
-
-[Brand new, was always on before.]
 
 > #### Unsuccessfully unbanned message
 Message shown when moderator tries to unban a not banned user.
 
 {0} is where user's nickname will go.
 
-[Brand new, could not be customized before.]
-
 ### TTS Configuration
 
 > #### TTS Language
 Change Text To Speach Language.
-
-[Unchanged]
 
 > #### Alter volume?
 Alter volume of Text To Speach generated file?
@@ -646,13 +536,8 @@ Alter volume of Text To Speach generated file?
 You could want to disable this expecially if volume changes generate
  oddities with custom TTS webservices.
 
-[Brand new, was always on before.]
-
 > #### TTS Volume
 Change Text To Speach volume.
-
-[Now it allows to change one point at time, before it was 5 at time.  
-Before it was from 15 to 200, not the range is from 1 to 100.]
 
 > #### Alter pitch?
 Alter pitch of Text To Speach generated file?
@@ -663,12 +548,8 @@ You could want to disable this expecially if pitch changes generate
 Note: Pitch will still influece speed final effect,
  if alter speed is enabled.
 
-[Brand new, was always on before.]
-
 > #### TTS % Pitch
 Change Text To Speach default pitch of voice.
-
-[Now it allows to change one point at time, before it was 5 at time]
 
 > #### Alter speed?
 Alter speed of TTS generated file?
@@ -678,26 +559,99 @@ You could want to disable this expecially if speed changes generate
 
 Note: Pitch value will also be involted, even if alter pitch is disabled.
 
-[Brand new, was always on before.]
-
 > #### TTS % Speed
 Change Text To Speach default speed of voice.
 
-[Now it allows to change one point at time, before it was 5 at time]
-
 > #### Max length (seconds)
 Limit the duration the Text To Speach will be speaking.
-
-[Unchanged]
 
 > #### Settings update confirmation
 Text To Speach will say this sentence to confirm settings are
  updated successfully.
 
-[Brand new, could not be customized before.]
+### TTS Multi Languages
+
+> #### Allows multi languages?
+It enables codes (from `Set all custom languages available`) to allow users
+ to request TTS for different languages.
+
+> #### Set all custom languages available
+Set all custom languages available, with their "in chat" codes.
+
+I.e.: `Language: code; Language2: code2;`  
+Like: `English (UK): en-GB; English (US): en-US; Italian: it-IT;`
+
+Note:  
+ Those codes have to actually be codes used by your TTS webservice
+  to define the TTS language to read... not just fantasy codes.  
+ The Language name, instead, it's up to your fantasy, but just try to not
+  make the text too long, I have no idea about Chatbots limits on length.
+
+Those codes are not mandatory to be used.
+
+In case an user doesn't use any of those codes, the main language setted
+ for this script will be used by default, as always.
+
+If used, the code have to follow the TTS Command itself (if `Read ALL chat`
+ option is not active), as first parameter before the text to be read.  
+I.e.: > `!tts it-IT It's a me: Mario!`  
+This will make Italian language bot read "It's a me: Mario!"...  
+ if it-IT code is actually configured in your settings, and !tts is still
+ the script's main Command setted into "Command configuration" section.  
+ Otherwise obviously the Command have to be the one you setted and so
+ for multilanguage codes: this is just an example with default options.
+
+In case `Read ALL chat` option is active, the code will have to be first
+ thing wrote into the message, still before the text to be read.  
+I.e.: > `it-IT It's a me: Mario!`  
+Unfunny note: the result will not remember Super Mario so much, sorry.
+
+Note:  
+ For now, the `Say this after the username` option in General
+  section is ignored when a custom multilanguage is used.  
+While the option `Say username before message` still works.
+
+Pro-Tip:  
+ Seeing the above note, you can put a code also for the same
+  main language you already setted into TTS Configuration section.
+
+By doing so and using the language code, the TTS will read the message
+ without the `Say this after the username` word, and the whole TTS will
+ sound as the describing of an action made by the user.
+
+Let's make this example:
+- The main language setted is `English US`.  
+ `Say username before message` is active.  
+ `Say this after the username` is `says`.  
+ `Command` option is `!tts`.  
+ Also Multilanguage option is enabled and between the others, there's also
+ a code setted for the main language itself: `English (US): en-US;`.
+- An user named `ThisIsMyNick` tries to use the Command:
+  - if he writes > `!tts is going crazy with this awesome TTS script`
+ the TTS will read: `ThisIsMyNick says is going crazy with this awesome TTS script`
+  - if he writes > `!tts en-US is going crazy with this awesome TTS script`
+ the TTS will read: `ThisIsMyNick is going crazy with this awesome TTS script`
+
+As you can see, the second example seems like TTS is describing
+ an user's action.
+
+> #### Codes are case sensitive?
+If enabled, languages' code uppercases and lowercases have to be respected.
+Otherwise codes will be case unsensitive (it-it or it-IT would both work).
+
+> #### Show available languages?
+If enabled, the following command `Show available languages command`
+ will be activated for chatters.
+
+> #### Show languages command
+Litellary writes in chat your custom languages setting,
+ to let chatters know possible languages.
+
+> #### Show languages cooldown (secs)
+Cooldown applied to `Show available languages command`.
+
 
 ### TTS Server
-[This section is totally brand new.]
 
 > #### Custom parameters
 These parameters will fill the webservice call, replacing in order {2}, {3}

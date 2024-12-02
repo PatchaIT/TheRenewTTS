@@ -20,6 +20,7 @@
 #   2022/11/20 v1.01 - First public release, not backwards compatible
 #   2023/01/27 v1.02 - Exported utility functions into
 #                       dedicated new library
+#   2023/02/03 v1.03 - Scripts utils library version 1.01
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -27,7 +28,7 @@ import os
 import codecs
 import json
 
-from scripts_utils_100 import get_parent
+from scripts_utils_101 import get_parent
 
 # Define Global Variables
 global Parent

@@ -5,16 +5,19 @@
 #           formely was:
 #               TheNewTTS script for Streamlabs Chatbot
 #               Copyright (C) 2020 Luis Sanchez
-# Version: 1.05
+# Version: 1.06
 # Description: Text to speech with Google translate voice,
 #               or your own custom TTS webservice
-# Change: Fixed a bug with Blacklist file loading
-#       Fixed a bug with TTS stuttering aliases with spaces
-#       Added permission level VIP (includes subscribers and moderators)
-#       Added setting to keep or not keep queing on pause
+# Change: Flag to preview textually in chat the reading text
+#       Channel owner doesn't need to pay anymore to use TTS
+#       Possibility to allow choosing TTS language into chat command
+#           More info in readMe file
 # Services: Twitch, Youtube
 # Overlays: None
-# Update Date: 2023/01/27
+# Update Date: 2023/07/30
+#
+# Note: You may have to delete old "lib" directory before update,
+#       because all new releases use new lib versions.
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # CHANGELOG:
@@ -95,6 +98,10 @@
 #   2023/01/27 av1.05 -
 #       Removed typo oddity into a comment
 #       Exported utility functions into dedicated new library
+#   2023/07/30 av1.06 -
+#       Flag to preview textually in chat the reading text
+#       Channel owner doesn't need to pay anymore to use TTS
+#       Possibility to allow choosing TTS language into chat command
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -115,10 +122,10 @@ clr.AddReference("IronPython.Modules.dll")
 
 # Add script's folder to path to be able to find the other modules
 sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
-from manage_media_utils_104 import MediaManager
-from settings_utils_102 import Settings
-from blacklist_utils_102 import Blacklist
-from scripts_utils_100 import run_cmd
+from manage_media_utils_105 import MediaManager
+from settings_utils_103 import Settings
+from blacklist_utils_103 import Blacklist
+from scripts_utils_101 import run_cmd
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -128,7 +135,7 @@ Description = "Text to speech with Google translate voice, or your own"\
                 " custom TTS webservice."
 ScriptName = "The Renew TTS"
 Creator = "Patcha (from LuisSanchezDev)"
-Version = "1.05"
+Version = "1.06"
 Website = "https://www.patcha.it"
 
 
@@ -167,10 +174,13 @@ BLACKLIST = None
 def Init():
     global SETTINGS, DIRECTORY
     global DEFAULTS, TIMEOUT
+    global CHANNEL_NAME
     global BOT_ON, DWNL_SET, LIB_PATH
     global PLAY_SET, MAN_SET, MEDIA_MAN
     global BLACKLIST_FILE, BLACKLIST
-    global THE_COMMAND, PAUSED, KEEP
+    global THE_COMMAND, GIB_LANGUAGES
+    global PAUSED, KEEP
+    global LANGUAGES, MAIN_LANG_CODE
 
     # Create Settings Directory
     if not os.path.exists(SETTINGS_PATH):
@@ -255,14 +265,32 @@ def Init():
         "tts_emote_prefix": "",
         "tts_cut_max_chars": True,
         "tts_max_chars": 200,
+        "tts_preview": False,
+        "tts_multi_lang_on": False,
+        "tts_multi_lang": "Arabic: ar-XA; Czech: cs-CZ; Danish: da-DK; "\
+            "Dutch: nl-NL; English (AUS): en-AU; English (IND): en-IN; "\
+            "English (UK): en-GB; English (US): en-US; Filipino: fil-PH; "\
+            "Finnish: fi-FI; French (CAN): fr-CA; French (FRA): fr-FR; "\
+            "German: de-DE; Greek: el-GR; Hindi: hi-IN; Hungarian: hu-HU; "\
+            "Indonesian: id-ID; Italian: it-IT; Japanese: ja-JP; "\
+            "Korean: ko-KR; Mandarin: cmn-CN; Norwegian: nb-NO; "\
+            "Polish: pl-PL; Portuguese (BRA): pt-BR; Portuguese (PRT): pt-PT; "\
+            "Russian: ru-RU; Slovak): sk-SK; Spanish (ESP): es-ES; "\
+            "Spanish (LATAM): es-MX; Swedish: sv-SE; Turkish: tr-TR; "\
+            "Ukrainian: uk-UA; Vietnamese: vi-VN;",
+        "tts_multi_lang_case_sensitive": False,
+        "tts_show_multi_lang_on": True,
+        "tts_show_multi_lang": "!langs",
+        "tts_show_multi_lang_cooldown": 25,
         "tts_params": "",
         "tts_webservice": "https://translate.google.com/translate_tts?ie="\
                             "UTF-8&tl={1}&client=tw-ob&q={0}",
-        "tts_audio_format" : ".mp3"
+        "tts_audio_format" : ".mp3",
     }
 
     SETTINGS = Settings(SETTINGS_FILE, DEFAULTS)
     THE_COMMAND = SETTINGS.command.lower()
+    GIB_LANGUAGES = SETTINGS.tts_show_multi_lang.lower()
     PAUSED = False
     KEEP = SETTINGS.do_keep
 
@@ -309,6 +337,7 @@ def Init():
         "emote_prefix": SETTINGS.tts_emote_prefix,
         "cut_max_chars": SETTINGS.tts_cut_max_chars,
         "max_chars": SETTINGS.tts_max_chars,
+        "preview": False,
         "params": SETTINGS.tts_params,
         "webservice": SETTINGS.tts_webservice,
         "audio_format" : SETTINGS.tts_audio_format,
@@ -322,21 +351,39 @@ def Init():
         "length": SETTINGS.tts_length,
         "timeout": TIMEOUT,
         "keep": SETTINGS.do_keep,
+        "preview": False,
     }
 
+    CHANNEL_NAME = Parent.GetChannelName()
+    if isinstance(CHANNEL_NAME, str):
+        CHANNEL_NAME = CHANNEL_NAME.lower()
+
     # Save on TTS bot resources and threads, if bot is not enabled
+    #  Note: "preview" setting in MediaManager has priority over
+    #       MediaDownloader and MediaPlayer "preview" settings
     BOT_ON = SETTINGS.tts_bot_on
     if BOT_ON:
         MAN_SET = {
             "script": SCRIPT_NAME,
             "timeout": TIMEOUT,
             "keep": SETTINGS.do_keep,
+            "preview": SETTINGS.tts_preview,
             "MEDIA_DWNL": DWNL_SET,
             "MEDIA_PLAY": PLAY_SET,
         }
         MEDIA_MAN = MediaManager(MAN_SET)
 
     BLACKLIST = Blacklist(BLACKLIST_FILE)
+
+    MAIN_LANG_CODE = MEDIA_MAN.MEDIA_DWNL.get_main_lang_code()
+
+    LANGUAGES = [lang.split(':') for lang \
+                                        in SETTINGS.tts_multi_lang.split('; ')]
+    if SETTINGS.tts_multi_lang_case_sensitive:
+        LANGUAGES = {lang[1].strip() : lang[0].strip() for lang in LANGUAGES }
+    else:
+        LANGUAGES = {lang[1].strip().lower() : lang[0].strip() \
+                                                        for lang in LANGUAGES }
 
     return
 
@@ -447,12 +494,78 @@ def Execute(data):
                                 MEDIA_MAN.MEDIA_DWNL.get_alias(target)))
                 return
 
-        # Check text to speak
-        if SETTINGS.read_all_text or command == THE_COMMAND:
+        # Check text to speak or chat commands
+        if SETTINGS.read_all_text or command == THE_COMMAND \
+                or command == GIB_LANGUAGES:
+
+            # Show languages command
+            if command == GIB_LANGUAGES \
+                    and SETTINGS.tts_multi_lang_on \
+                    and SETTINGS.tts_show_multi_lang_on:
+
+                # check command's cooldown
+                if (SETTINGS.tts_show_multi_lang_cooldown and
+                        Parent.GetCooldownDuration(
+                            ScriptName, SETTINGS.tts_show_multi_lang)):
+                    if SETTINGS.do_msg_cooldown:
+                        Parent.SendStreamMessage(SETTINGS.msg_cooldown)
+                    return
+
+                # tell languages setting
+                Parent.SendStreamMessage(SETTINGS.tts_multi_lang
+                    + " Note: codes are "
+                    + ("NOT " if not SETTINGS.tts_multi_lang_case_sensitive
+                        else "") + "case sensitive!")
+
+                # apply cooldown
+                Parent.AddCooldown(ScriptName,
+                    SETTINGS.tts_show_multi_lang,
+                    SETTINGS.tts_show_multi_lang_cooldown)
+
+                return
+
+            # involving TTS
             if not PAUSED or KEEP:
                 text = data.Message
                 start = text[0]
-                text = re.sub(r'^'+THE_COMMAND+' ', '', text, flags=re.IGNORECASE)
+                lang = ""
+
+                # check if custom language
+                if SETTINGS.tts_multi_lang_on:
+                    maybe_lang = data.GetParam(1) \
+                        if not SETTINGS.read_all_text \
+                        else data.GetParam(0)
+                    if not SETTINGS.tts_multi_lang_case_sensitive:
+                        maybe_lang = maybe_lang.lower()
+                    if maybe_lang in LANGUAGES:
+                        lang = maybe_lang
+                    if lang:
+                        text = re.sub(r'' + re.escape(lang) + ' ', '',
+                                text, count=1, flags = re.IGNORECASE)
+
+                # Normalize text to read in case of command
+                if command == THE_COMMAND:
+                    text = re.sub(r'^'+THE_COMMAND+' ', '', text,
+                                    flags = re.IGNORECASE)
+
+                # Add username or alias if option enabled,
+                #  add the say_after_username
+                #   if set and if no specific language choosen
+                # a colon will be added, only if no custom language
+                #  or not the same than main language
+                if SETTINGS.say_username:
+                    prefix = alias_name + " " + SETTINGS.say_after_username \
+                        if SETTINGS.say_after_username and not lang \
+                        else alias_name
+                    prefix = prefix + ": " \
+                        if not lang or (
+                            SETTINGS.tts_multi_lang_case_sensitive
+                                and lang != MAIN_LANG_CODE) or (
+                            not SETTINGS.tts_multi_lang_case_sensitive
+                                and lang.lower() != MAIN_LANG_CODE.lower()) \
+                        else prefix + " "
+                    text = prefix + text
+
                 text = MEDIA_MAN.MEDIA_DWNL.get_ref_text(text)
 
                 # Read the whole chat
@@ -468,18 +581,21 @@ def Execute(data):
 
                     # check length, speak error only if not paused (no queing)
                     if len(text) > MEDIA_MAN.MEDIA_DWNL.get_max_chars():
-                        if SETTINGS.do_msg_too_long and not MEDIA_MAN.is_paused():
+                        if SETTINGS.do_msg_too_long \
+                                and not MEDIA_MAN.is_paused():
                             MEDIA_MAN.append(
                                 SETTINGS.msg_too_long.format(alias_name))
 
                     # play message
                     else:
-                        MEDIA_MAN.append(alias_name + " "
-                            + SETTINGS.say_after_username + ": "
-                            + text if SETTINGS.say_username else text)
+                        MEDIA_MAN.append(text, lang = lang if lang else None)
 
-                # Read on command
-                elif command == THE_COMMAND:
+                # Valid command
+                elif command == THE_COMMAND or (
+                        command == GIB_LANGUAGES and SETTINGS.tts_multi_lang_on
+                        and SETTINGS.tts_show_multi_lang_on):
+
+                    # check permission
                     if not Parent.HasPermission(
                             data.User, SETTINGS.permission, ""):
                         if SETTINGS.do_msg_permission:
@@ -493,58 +609,65 @@ def Execute(data):
                                 SETTINGS.msg_blacklisted.format(alias_name))
                         return
 
-                    # check user's cooldown
-                    if (SETTINGS.user_cooldown and
-                            Parent.GetUserCooldownDuration(
-                                ScriptName, SETTINGS.command, data.User)):
-                        if SETTINGS.do_msg_user_cooldown:
-                            Parent.SendStreamMessage(SETTINGS.msg_user_cooldown)
-                        return
+                    # Read command
+                    if command == THE_COMMAND:
 
-                    # check command's cooldown
-                    if (SETTINGS.cooldown and
-                            Parent.GetCooldownDuration(
-                                ScriptName, SETTINGS.command)):
-                        if SETTINGS.do_msg_cooldown:
-                            Parent.SendStreamMessage(SETTINGS.msg_cooldown)
-                        return
-
-                    # check if enough coins
-                    if SETTINGS.cost > 0:
-                        if not Parent.RemovePoints(
-                                data.User, data.UserName, SETTINGS.cost):
-                            if SETTINGS.do_msg_cost:
-                                Parent.SendStreamMessage(SETTINGS.msg_cost)
+                        # check user's cooldown
+                        if (SETTINGS.user_cooldown and
+                                Parent.GetUserCooldownDuration(
+                                    ScriptName, SETTINGS.command, data.User)):
+                            if SETTINGS.do_msg_user_cooldown:
+                                Parent.SendStreamMessage(
+                                                    SETTINGS.msg_user_cooldown)
                             return
 
-                    # check message
-                    if not data.GetParam(1):
-                        if SETTINGS.do_msg_missing_text:
-                            Parent.SendStreamMessage(SETTINGS.msg_missing_text)
-                        return
+                        # check command's cooldown
+                        if (SETTINGS.cooldown and
+                                Parent.GetCooldownDuration(
+                                    ScriptName, SETTINGS.command)):
+                            if SETTINGS.do_msg_cooldown:
+                                Parent.SendStreamMessage(SETTINGS.msg_cooldown)
+                            return
 
-                    # if message too long
-                    if len(text) > MEDIA_MAN.MEDIA_DWNL.get_max_chars():
-                        if SETTINGS.cost > 0:
-                            Parent.AddPoints(data.User, data.UserName, SETTINGS.cost)
-                        if SETTINGS.do_msg_too_long:
-                            Parent.SendStreamMessage(
-                                SETTINGS.msg_too_long.format(alias_name))
-                        return
+                        # check if enough coins / points
+                        if SETTINGS.cost > 0 and user_name != CHANNEL_NAME:
+                            if not Parent.RemovePoints(
+                                    data.User, data.UserName, SETTINGS.cost):
+                                if SETTINGS.do_msg_cost:
+                                    Parent.SendStreamMessage(SETTINGS.msg_cost)
+                                return
 
-                    # play message
-                    else:
-                        media = MEDIA_MAN.append(alias_name + " "
-                            + SETTINGS.say_after_username + ": "
-                            + text if SETTINGS.say_username else text)
+                        # check message
+                        if not data.GetParam(1) or \
+                                (lang and not data.GetParam(2)):
+                            if SETTINGS.do_msg_missing_text:
+                                Parent.SendStreamMessage(
+                                                    SETTINGS.msg_missing_text)
+                            return
 
-                    # apply cooldowns
-                    Parent.AddCooldown(ScriptName,
-                        SETTINGS.command, SETTINGS.cooldown)
-                    Parent.AddUserCooldown(ScriptName,
-                        SETTINGS.command, data.User, SETTINGS.user_cooldown)
+                        # if message too long
+                        if len(text) > MEDIA_MAN.MEDIA_DWNL.get_max_chars():
+                            # refound coins / points
+                            if SETTINGS.cost > 0 and user_name != CHANNEL_NAME:
+                                Parent.AddPoints(data.User, data.UserName,
+                                    SETTINGS.cost)
+                            if SETTINGS.do_msg_too_long:
+                                Parent.SendStreamMessage(
+                                    SETTINGS.msg_too_long.format(alias_name))
+                            return
+
+                        # play message
+                        media = MEDIA_MAN.append(text, lang = lang
+                                                        if lang else None)
+
+                        # apply cooldowns
+                        Parent.AddCooldown(ScriptName,
+                            SETTINGS.command, SETTINGS.cooldown)
+                        Parent.AddUserCooldown(ScriptName,
+                            SETTINGS.command, data.User, SETTINGS.user_cooldown)
 
     return
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   [Required] Tick method (Gets called during every iteration even
@@ -552,6 +675,7 @@ def Execute(data):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def Tick():
     return
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   [Optional] Reload Settings (Called when a user clicks the
@@ -562,8 +686,9 @@ def ReloadSettings(jsonData):
     Unload()
     Init()
     if BOT_ON and MEDIA_MAN and SETTINGS.tts_confirm:
-        MEDIA_MAN.append(SETTINGS.tts_confirm)
+        MEDIA_MAN.append(SETTINGS.tts_confirm, False)
     return
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   [Optional] Unload (Called when a user reloads their scripts or

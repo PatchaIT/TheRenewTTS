@@ -68,7 +68,7 @@
         "type": "textbox",
         "value": "says",
         "label": "Say this after the username",
-        "tooltip": "Append this text to the username so the TTS makes more sense",
+        "tooltip": "Append this text to the username so the TTS makes more sense.\nNote: it will not apply if a language is chosen by chatter with multi language option active.",
         "group": "General"
     },
     "ignore_starting_with": {
@@ -78,18 +78,11 @@
         "tooltip": "Ignore messages starting with any of these characters to prevent commands being spoken",
         "group": "General"
     },
-   "tts_replaces": {
+    "tts_replaces": {
         "type": "textbox",
         "value": "_@",
         "label": "Replace these with spaces",
         "tooltip": "For each character in here, replaces each occurrence of it with a white space, so TTS will not read them literally.",
-        "group": "General"
-    },
-    "tts_emote_name_first_is_upper": {
-        "type": "checkbox",
-        "value": true,
-        "label": "First emotes' name letter is uppercase, after prefix",
-        "tooltip": "Check this if the first letter of your emotes' name (the first letter after your channel prefix) is uppercased.\nChecking this flag could help next option (Emote prefix, don't read this) to not be too invasive and to create less oddities.",
         "group": "General"
     },
     "tts_emote_prefix": {
@@ -97,6 +90,13 @@
         "value": "",
         "label": "Emote prefix, don't read this",
         "tooltip": "If you want to read your own channel emotes name as words and skip prefix, specify it here.\nBe sure it is not a common char sequence used in your TTS, otherwise it would became mute at any occurrence, also outside emotes' name. It is case sensitive.\nSetting the other option (First emotes' name letter is uppercase) could help.\nLeft empty if you don't want to use this option.",
+        "group": "General"
+    },
+    "tts_emote_name_first_is_upper": {
+        "type": "checkbox",
+        "value": true,
+        "label": "First emotes' name letter is uppercase, after prefix",
+        "tooltip": "Check this if the first letter of your emotes' name (the first letter after your channel prefix) is uppercased.\nChecking this flag could help next option (Emote prefix, don't read this) to not be too invasive and to create less oddities.",
         "group": "General"
     },
     "tts_alias_list": {
@@ -128,6 +128,13 @@
         "max": 200,
         "ticks": 1,
         "tooltip": "Max characters allowed to submit to TTS.",
+        "group": "General"
+    },
+    "tts_preview": {
+        "type": "checkbox",
+        "value": false,
+        "label": "Write in chat the text to be read",
+        "tooltip": "Turn ON to write in chat the sentence TTS is gonna read.\n(Mainly for debug purposes.)",
         "group": "General"
     },
     "command": {
@@ -301,7 +308,7 @@
     },
     "do_keep": {
         "type": "checkbox",
-        "value": true,
+        "value": false,
         "label": "Keep queuing on pause",
         "tooltip": "Check this to keep queuing new TTS messages even if you paused the script.\nAll queued messages will be read sequentially after unpaused, you can still skip them with skip commands.",
         "group": "Moderator commands"
@@ -479,7 +486,7 @@
         "tooltip": "Change Language",
         "items": [
             "Arabic [ar-XA]",
-            "Czech (Czech Republic) [cs-CZ]ar",
+            "Czech (Czech Republic) [cs-CZ]",
             "Danish (Denmark) [da-DK]",
             "Dutch (Netherlands) [nl-NL]",
             "English (Australia) [en-AU]",
@@ -575,28 +582,70 @@
         "tooltip": "Limit the duration the TTS will be speaking.",
         "group": "TTS Configuration"
     },
-   "tts_confirm": {
+    "tts_confirm": {
         "type": "textbox",
         "value": "Configuration updated successfully",
         "label": "Settings update confirmation",
         "tooltip": "TTS will say this sentence to confirm settings are updated successfully.",
         "group": "TTS Configuration"
     },
-   "tts_params": {
+    "tts_multi_lang_on": {
+        "type": "checkbox",
+        "value": false,
+        "label": "Allows multi languages?",
+        "tooltip": "It enables codes (from list below) to allow users to request TTS for different languages.",
+        "group": "TTS Multi languages"
+    },
+    "tts_multi_lang": {
+        "type": "textbox",
+        "value": "Arabic: ar-XA; Czech: cs-CZ; Danish: da-DK; Dutch: nl-NL; English (AUS): en-AU; English (IND): en-IN; English (UK): en-GB; English (US): en-US; Filipino: fil-PH; Finnish: fi-FI; French (CAN): fr-CA; French (FRA): fr-FR; German: de-DE; Greek: el-GR; Hindi: hi-IN; Hungarian: hu-HU; Indonesian: id-ID; Italian: it-IT; Japanese: ja-JP; Korean: ko-KR; Mandarin: cmn-CN; Norwegian: nb-NO; Polish: pl-PL; Portuguese (BRA): pt-BR; Portuguese (PRT): pt-PT; Russian: ru-RU; Slovak): sk-SK; Spanish (ESP): es-ES; Spanish (LATAM): es-MX; Swedish: sv-SE; Turkish: tr-TR; Ukrainian: uk-UA; Vietnamese: vi-VN;",
+        "label": "Set all custom languages available",
+        "tooltip": "Set all custom languages available, with their \"in chat\" codes. Like \"Language: code; Language2: code2;\" without quotes.\nThe code will have to follow the command itself, as first parameter before the text to be read.",
+        "group": "TTS Multi languages"
+    },
+    "tts_multi_lang_case_sensitive": {
+        "type": "checkbox",
+        "value": false,
+        "label": "Codes are case sensitive?",
+        "tooltip": "If enabled, languages' code uppercases and lowercases have to be respected.",
+        "group": "TTS Multi languages"
+    },
+    "tts_show_multi_lang_on": {
+        "type": "checkbox",
+        "value": true,
+        "label": "Show available languages?",
+        "tooltip": "If enabled, the following command \"Show available languages command\" will be activated for chatters.",
+        "group": "TTS Multi languages"
+    },
+    "tts_show_multi_lang": {
+        "type": "textbox",
+        "label": "Show languages command",
+        "value": "!langs",
+        "tooltip": "Litellary writes in chat your custom languages setting, to let chatters know possible languages.",
+        "group": "TTS Multi languages"
+    },
+    "tts_show_multi_lang_cooldown": {
+        "type": "numberbox",
+        "value": 25,
+        "label": "Show languages cooldown (secs)",
+        "tooltip": "Cooldown applied to \"Show available languages command\".",
+        "group": "TTS Multi languages"
+    },
+    "tts_params": {
         "type": "textbox",
         "value": "\"i.e. this will replace {2}\"\"This will replace {3}\"",
         "label": "Custom parameters",
         "tooltip": "These parameters will fill the webservice call, replacing in order {2}, {3} and so on.\nThey have to be enclosed in quotation marks.\n{0} and {1} are not included because they'll be {0} = text to read and {1} = lang.\nIf your webservice lang format is different than default (i.e not: 'en-GB', 'fil-PH', 'it-IT') you can set it as custom parameter.",
         "group": "TTS Server"
     },
-   "tts_webservice": {
+    "tts_webservice": {
         "type": "textbox",
         "value": "https://translate.google.com/translate_tts?ie=UTF-8&tl={1}&client=tw-ob&q={0}",
         "label": "Webservice",
         "tooltip": "The webservice to be called for TTS services. {0}, {1} and so on will be replaced by parameters, in order, as for previous field.",
         "group": "TTS Server"
     },
-   "tts_audio_format": {
+    "tts_audio_format": {
         "type": "textbox",
         "value": ".mp3",
         "label": "Audio format",
