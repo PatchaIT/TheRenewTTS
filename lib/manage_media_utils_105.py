@@ -20,7 +20,11 @@
 #   2022/11/27 v1.01 - Allows to force read lowercased or uppercased
 #   2023/01/15 v1.02 - Added a pause method (in tts library)
 #   2023/01/24 av1.03 - Added setting to keep or not queing on pause
-#   2023/01/27 av1.04 - Adopts scripts utils library v.1.0
+#   2023/01/27 av1.04 - Adopts scripts utils library
+#   2023/02/01 av1.05 -
+#       Flag to preview textually in chat the reading text
+#               if you use "append" method
+#       Possibility to choose a specific language for the TTS reader
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -34,9 +38,9 @@ clr.AddReference("System.Web")
 from System.Web import HttpUtility
 from System.Net import WebClient
 
-from tts_media_utils_105 import MediaDownloader
-from play_media_utils_104 import MediaPlayer
-from scripts_utils_100 import get_parent
+from tts_media_utils_106 import MediaDownloader
+from play_media_utils_105 import MediaPlayer
+from scripts_utils_101 import *
 
 
 # Define Global Variables
@@ -44,7 +48,8 @@ global Parent
 
 _defaults = {
     # "script": cannot have a default, must be explicit
-    "timeout": 30
+    "timeout": 30,
+    "preview": False,
     # "MEDIA_DWNL": cannot have a default, must be explicit instance of
     #                   Media_Downloader or its configuraton dict
     # "MEDIA_PLAY": cannot have a default, must be explicit instance of
@@ -80,7 +85,8 @@ class MediaManager:
     def __settings_check(self, settings):
         settings = self.__check_defaults(settings)
 
-        settings["timeout"] = int(self._float_check(settings["timeout"], 30))
+        settings["timeout"] = int(float_check(settings["timeout"], 30))
+        settings["preview"] = check_false(settings["preview"])
 
         if "MEDIA_DWNL" not in settings or not settings["MEDIA_DWNL"]:
             self._valid = False
@@ -119,16 +125,6 @@ class MediaManager:
             if not set in settings:
                 settings[set] = _defaults[set]
         return settings
-
-
-    # check if the value could be a valid float, and return it casted
-    #   to float
-    # if not, returns the given default
-    def _float_check(self, value, default):
-        try:
-            return float(value)
-        except:
-            return default
 
 
     # start thread
@@ -233,7 +229,13 @@ class MediaManager:
                     break
 
                 if self._texts and not self._paused:
-                    text = self._texts.pop(0)
+                    text_info = self._texts.pop(0)
+                    text = text_info[0]
+                    preview = text_info[1]
+                    lang = text_info[2]
+
+                    if preview is not True and preview is not False:
+                        preview = self.__settings["preview"]
 
                     try:
                         if self._close:
@@ -241,7 +243,7 @@ class MediaManager:
 
                         if text:
                             if self.MEDIA_DWNL:
-                                text = self.MEDIA_DWNL.append(text)
+                                text = self.MEDIA_DWNL.append(text, lang = lang)
                                 path = self.MEDIA_DWNL.get_now(text)
                             else:
                                 Parent.Log(settings["script"],
@@ -264,8 +266,11 @@ class MediaManager:
 
                             if path:
                                 if self.MEDIA_PLAY:
-                                    self.MEDIA_PLAY.append_play_clean(path,
-                                                                    text)
+                                    self.MEDIA_PLAY.append_play_clean(
+                                                                        path,
+                                                                        text,
+                                                                        preview
+                                                                    )
                                 else:
                                     Parent.Log(settings["script"],
                                         "ttsXplay play TTS: MEDIA_PLAY"\
@@ -293,11 +298,11 @@ class MediaManager:
     # returns a preview of the new reference text, eventually cut to
     #   usually 200 chars max and with replaced chars
     #   or empty string if nothing was appended
-    def append(self, text):
+    def append(self, text, preview = None, lang = None):
 
         if self._valid and self.MEDIA_PLAY and self.MEDIA_DWNL:
             if not self._paused or self._keep:
-                self._texts.append(text)
+                self._texts.append([text, preview, lang])
                 return self.MEDIA_DWNL.get_ref_text(text)
 
             else:

@@ -20,6 +20,7 @@
 #   2023/01/24 v1.01 - Fixed a bug with lowercasing loaded data
 #   2023/01/27 v1.02 - Exported utility functions into
 #                       dedicated new library
+#   2023/02/03 v1.03 - Scripts utils library version 1.01
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -27,7 +28,7 @@ import os
 import json
 import codecs
 
-from scripts_utils_100 import strip_username, get_parent
+from scripts_utils_101 import strip_username, get_parent
 
 
 class Blacklist:

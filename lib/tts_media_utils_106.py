@@ -34,6 +34,13 @@
 #   2023/01/24 av1.05 -
 #       Removed typo oddity into a comment
 #       Exported utility functions into dedicated new library
+#   2023/02/01 av1.06 -
+#       Flag to disable using aliases even if any
+#       Flag to preview textually in chat the reading text
+#               if you use "append_and_play" method
+#           or write textually in chat the third parameter
+#               if you use "play" method and you set a second parameter
+#       Possibility to choose a specific language for the TTS reader
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -47,7 +54,7 @@ import re
 clr.AddReference("System.Web")
 from System.Web import HttpUtility
 
-from scripts_utils_100 import *
+from scripts_utils_101 import *
 
 # Define Global Variables
 global Parent, _defaults, _cases
@@ -63,10 +70,12 @@ _defaults = {
     "speed": 100,
     "length": 30,
     "timeout": 30,
+    "keep": False,
     "case": "",
     "clean_rep_lett": True,
     "clean_rep_word": True,
     "max_rep_word": 3,
+    "alias_on": True,
     "alias_list": "",
     "chars_swapping": "",
     "clean_urls": False,
@@ -76,9 +85,10 @@ _defaults = {
     "emote_prefix": "",
     "cut_max_chars": True,
     "max_chars": 200,
+    "preview": False,
     "params": "",
     "webservice": "",
-    "audio_format" : ""
+    "audio_format" : "",
     # "_path": cannot have a default, must be explicit
     # "_cache": cannot have a default, must be explicit
 }
@@ -113,36 +123,41 @@ class MediaDownloader:
                                 .groups()[0] if settings["lang"] else "en-US"
                             )
 
-        settings["volume"] = self._float_check(settings["volume"], 1.0)
-        settings["pitch"] = self._float_check(settings["pitch"], 1.0)
-        settings["speed"] = self._float_check(settings["speed"], 1.0)
-        settings["length"] = int(self._float_check(settings["length"], 30))
-        settings["timeout"] = int(self._float_check(settings["timeout"], 30))
+        settings["volume"] = float_check(settings["volume"], 1.0)
+        settings["pitch"] = float_check(settings["pitch"], 1.0)
+        settings["speed"] = float_check(settings["speed"], 1.0)
+        settings["length"] = int(float_check(settings["length"], 30))
+        settings["timeout"] = int(float_check(settings["timeout"], 30))
 
-        settings["cut_max_chars"] = self._check_false(
+        settings["cut_max_chars"] = check_false(
                                         settings["cut_max_chars"])
-        settings["max_chars"] = int(self._float_check(settings["max_chars"],
+        settings["max_chars"] = int(float_check(settings["max_chars"],
                                         200))
         if settings["max_chars"] > 200:
             settings["max_chars"] = 200
 
-        settings["volume_on"] = self._check_false(settings["volume_on"])
-        settings["pitch_on"] = self._check_false(settings["pitch_on"])
-        settings["speed_on"] = self._check_false(settings["speed_on"])
+        settings["volume_on"] = check_false(settings["volume_on"])
+        settings["pitch_on"] = check_false(settings["pitch_on"])
+        settings["speed_on"] = check_false(settings["speed_on"])
 
-        settings["case"] = self._check_in_list(settings["case"], _cases, 0)
+        settings["case"] = check_in_list(settings["case"], _cases, 0)
 
-        settings["clean_rep_lett"] = self._check_false(
+        settings["clean_rep_lett"] = check_false(
                                         settings["clean_rep_lett"])
-        settings["clean_rep_word"] = self._check_false(
+        settings["clean_rep_word"] = check_false(
                                         settings["clean_rep_word"])
-        settings["max_rep_word"] = int(self._float_check(
+        settings["max_rep_word"] = int(float_check(
                                         settings["max_rep_word"], 3))
+        settings["alias_on"] = check_false(
+                                        settings["alias_on"])
         settings["alias_list"] = parse_alias_list(
                                         settings["alias_list"])
         settings["chars_swapping"] = parse_alias_list(
                                         settings["chars_swapping"])
-        settings["clean_urls"] = self._check_false(settings["clean_urls"])
+        settings["clean_urls"] = check_false(
+                                        settings["clean_urls"])
+
+        settings["preview"] = check_false(settings["preview"])
 
         if settings["webservice"]:
             settings["webservice"] = settings["webservice"].strip(" ")
@@ -172,34 +187,6 @@ class MediaDownloader:
             if not set in settings:
                 settings[set] = _defaults[set]
         return settings
-
-
-    # check if the value could be a valid float, and return it casted
-    #   to float
-    # if not, returns the given default
-    def _float_check(self, value, default):
-        try:
-            return float(value)
-        except:
-            return default
-
-
-    # check if the value is trying to be a False boolean, and returns
-    #   a real boolean
-    # returns True if True or "True"; otherwise False
-    def _check_false(self, value):
-        return (value == True or
-                (isinstance(value, str) and value.lower() == "true")
-                )
-
-
-    # check if the value is included into given list
-    # returns value if in list, otherwise the element on index
-    def _check_in_list(self, value, list, index):
-        if value and list and value not in list:
-            value = list[index]
-
-        return value
 
 
     # creates a list of parameters starting from lang setting and
@@ -291,11 +278,16 @@ class MediaDownloader:
                     break
 
                 if self._texts and not self._paused:
-                    text = self._texts.pop(0)
+                    text_info = self._texts.pop(0)
+                    text = text_info[0]
+                    lang = text_info[1]
 
                     if len(text) <= self.get_max_chars():
                         params = [HttpUtility.UrlEncode(text)]
                         params.extend(self.__settings["params"])
+
+                        if lang is not None:
+                            params[1] = lang
 
                         file_path = os.path.join(
                                 self.__settings["_cache"],
@@ -336,11 +328,11 @@ class MediaDownloader:
     #   by setup
     # returns the new reference text, eventually with cuts and replaces
     #   or empty string if nothing was appended
-    def append(self, text):
+    def append(self, text, lang = None):
 
         if not self._paused or self._keep:
             text = self.get_ref_text(text)
-            self._texts.append(text)
+            self._texts.append([text, lang])
         else:
             return ""
 
@@ -351,21 +343,22 @@ class MediaDownloader:
     #   same reference text which would be used on append method call
     def get_ref_text(self, text):
         return self.__ref_text(
-                                text,
-                                self.__settings["case"],
-                                self.__settings["clean_urls"],
-                                self.__settings["replace_urls"],
-                                self.__settings["emote_prefix"],
-                                self.__settings["emote_name_upper"],
-                                self.__settings["clean_rep_word"],
-                                self.__settings["max_rep_word"],
-                                self.__settings["clean_rep_lett"],
-                                self.__settings["replaces"],
-                                self.__settings["alias_list"],
-                                self.__settings["chars_swapping"],
-                                self.__settings["cut_max_chars"],
-                                self.get_max_chars()
-                                )
+                            text,
+                            self.__settings["case"],
+                            self.__settings["clean_urls"],
+                            self.__settings["replace_urls"],
+                            self.__settings["emote_prefix"],
+                            self.__settings["emote_name_upper"],
+                            self.__settings["clean_rep_word"],
+                            self.__settings["max_rep_word"],
+                            self.__settings["clean_rep_lett"],
+                            self.__settings["replaces"],
+                            self.__settings["alias_list"] \
+                                if self.__settings["alias_on"] else {},
+                            self.__settings["chars_swapping"],
+                            self.__settings["cut_max_chars"],
+                            self.get_max_chars()
+                            )
 
 
     # Internal core method to get a reference text from original text,
@@ -519,6 +512,11 @@ class MediaDownloader:
 
 
     # External method to get current max chars setting
+    def get_main_lang_code(self):
+        return self.__settings["lang"]
+
+
+    # External method to get current max chars setting
     def get_max_chars(self):
         return self.__settings["max_chars"]
 
@@ -576,10 +574,16 @@ class MediaDownloader:
     # For TTS audio generated by this library,
     #   the volume is already set internally, so this method keeps it
     #   untouched by always playing at volume 1.0
-    def play(self, path):
-        if path:
-            while not Parent.PlaySound(path, 1.0):
-                continue
+    def play(self, path, text = None, preview = None):
+        if preview is not True and preview is not False:
+            preview = self.__settings["preview"]
+
+        while not parent_audio_player(path, 1.0):
+            continue
+
+        if text and preview:
+            Parent.SendStreamMessage(text)
+
         return True
 
 
@@ -612,14 +616,14 @@ class MediaDownloader:
     #      if something goes wrong.
     # Returns the new reference text, eventually cut to max chars and
     #   with chars replacements.
-    def append_and_play(self, text):
-        text = self.append(text)
+    def append_and_play(self, text, preview = None, lang = None):
+        text = self.append(text, lang)
 
         if text:
             path = self.get_now(text)
 
             if path:
-                self.play(path)
+                self.play(path, text, preview)
                 self.clean(path)
 
         return text
