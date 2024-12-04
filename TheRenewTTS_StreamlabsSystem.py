@@ -5,16 +5,14 @@
 #           formely was:
 #               TheNewTTS script for Streamlabs Chatbot
 #               Copyright (C) 2020 Luis Sanchez
-# Version: 1.06
+# Version: 1.1
 # Description: Text to speech with Google translate voice,
 #               or your own custom TTS webservice
-# Change: Flag to preview textually in chat the reading text
-#       Channel owner doesn't need to pay anymore to use TTS
-#       Possibility to allow choosing TTS language into chat command
-#           More info in readMe file
+# Change: Fixed issue with sometimes custom settings not correctly
+#           loaded
 # Services: Twitch, Youtube
 # Overlays: None
-# Update Date: 2023/07/30
+# Update Date: 2023/12/03
 #
 # Note: You may have to delete old "lib" directory before update,
 #       because all new releases use new lib versions.
@@ -102,6 +100,9 @@
 #       Flag to preview textually in chat the reading text
 #       Channel owner doesn't need to pay anymore to use TTS
 #       Possibility to allow choosing TTS language into chat command
+#   2023/12/03 v1.1 -
+#       Fixed issue with sometimes custom settings not correctly loaded
+#       Thanks Chidinma for testing!
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -123,7 +124,7 @@ clr.AddReference("IronPython.Modules.dll")
 # Add script's folder to path to be able to find the other modules
 sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
 from manage_media_utils_105 import MediaManager
-from settings_utils_103 import Settings
+from settings_utils_104 import Settings
 from blacklist_utils_103 import Blacklist
 from scripts_utils_101 import run_cmd
 
@@ -135,7 +136,7 @@ Description = "Text to speech with Google translate voice, or your own"\
                 " custom TTS webservice."
 ScriptName = "The Renew TTS"
 Creator = "Patcha (from LuisSanchezDev)"
-Version = "1.06"
+Version = "1.1"
 Website = "https://www.patcha.it"
 
 

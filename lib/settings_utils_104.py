@@ -21,6 +21,8 @@
 #   2023/01/27 v1.02 - Exported utility functions into
 #                       dedicated new library
 #   2023/02/03 v1.03 - Scripts utils library version 1.01
+#   2023/11/25 v1.04 - Fixed issue with sometimes custom settings not
+#                       correctly loaded
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -51,7 +53,7 @@ class Settings:
                                 encoding='utf-8-sig',
                                 mode='r'
                             ) as f:
-                self.__dict__ = json.load(f, encoding='utf-8-sig') 
+                self.__dict__.update(json.load(f, encoding='utf-8-sig'))
 
         # initialize missing variables to defaults,
         #   if no settings file or incomplete data
@@ -66,7 +68,7 @@ class Settings:
             self._defaults = defaults
         # otherwise, try to use his own if any
         else:
-            defaults = _defaults
+            defaults = self._defaults
 
         # could still be no defaults set, but if any,
         #   will be used to complete settings
