@@ -53,17 +53,14 @@ Note for Custom TTS:
 ## In Shorts
 
 - Script: The ReNew TTS script
-- Version: 1.0.6
+- Version: 1.1.0
 - Description: Text to speech with Google translate voice,
    or your own custom TTS webservice
-- Change: Flag to preview textually in chat the reading text;
-   Channel owner doesn't need to pay anymore to use TTS;
-   Possibility to allow choosing TTS language into chat command:
-     more info below
+- Change: Fixed issue with sometimes custom settings not correctly loaded
 - Services: Twitch, Youtube
 - Overlays: None
 - Made By: @Patcha_it
-- Update Date: 2023/07/30
+- Update Date: 2023/12/03
 
 ## Changelog
 
@@ -153,6 +150,9 @@ Note for Custom TTS:
   - Flag to preview textually in chat the reading text
   - Channel owner doesn't need to pay anymore to use TTS
   - Possibility to allow choosing TTS language into chat command
+- 2023/12/03 v1.1.0 -
+  - Fixed issue with sometimes custom settings not correctly loaded
+  - Thanks Chidinma for testing!
 
 ## Getting Started
 
