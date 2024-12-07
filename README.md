@@ -91,7 +91,7 @@ Note for Custom TTS:
 ## In Shorts
 
 - Script: The ReNew TTS script
-- Version: 1.1.1
+- Version: 1.1.1-SNAPSHOT
 - Description: Text to speech with Google translate voice,
    or your own custom TTS webservice
 - Change: Final fixing issue with sometimes custom settings
@@ -193,7 +193,7 @@ Note for Custom TTS:
 - 2023/12/03 v1.1.0 -
   - Fixed issue with sometimes custom settings not correctly loaded
   - Thanks Chidinma for testing!
-- 2025/xx/xx v1.1.1 -
+- 2025/xx/xx v1.1.1 - SNAPSHOT
   - Final fixing issue with sometimes custom settings not correctly loaded
   - Possibility to manually set channel/streamer name
 
