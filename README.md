@@ -1,4 +1,4 @@
-[![development status | 5 - Production](https://img.shields.io/badge/Development_Status-5_--_Production-green)](https://pypi.org/classifiers/)
+[![development status | 1 - Planning](https://img.shields.io/badge/Development_Status-1_--_Planning-yellow)](https://pypi.org/classifiers/)
 [![code style: pep-008](https://img.shields.io/badge/code_style-pep--0008-FFF8FF)](https://peps.python.org/pep-0008/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 ![release](https://img.shields.io/github/v/release/PatchaIT/TheRenewTTS)
@@ -16,7 +16,7 @@ TheRenewTTS
 ## Table of Contents
 
 * [About the Project](#about-the-project)
-  * [Warning Note](#warning-note)
+  * [Warning Notes](#warning-notes)
 * [In Shorts](#in-shorts)
 * [Changelog](#changelog)
   * [Versions by LuisSanchezDev (TheNewTTS)](#versions-by-luissanchezdev-thenewtts)
@@ -91,10 +91,12 @@ Note for Custom TTS:
 ## In Shorts
 
 - Script: The ReNew TTS script
-- Version: 1.1.0
+- Version: 1.1.1
 - Description: Text to speech with Google translate voice,
    or your own custom TTS webservice
-- Change: Fixed issue with sometimes custom settings not correctly loaded
+- Change: Final fixing issue with sometimes custom settings
+           not correctly loaded;
+       Possibility to manually set channel/streamer name
 - Services: Twitch, Youtube
 - Overlays: None
 - Made By: @Patcha_it
@@ -191,6 +193,9 @@ Note for Custom TTS:
 - 2023/12/03 v1.1.0 -
   - Fixed issue with sometimes custom settings not correctly loaded
   - Thanks Chidinma for testing!
+- 202x/xx/xx v1.1.1 -
+  - Final fixing issue with sometimes custom settings not correctly loaded
+  - Possibility to manually set channel/streamer name
 
 ## Getting Started
 
