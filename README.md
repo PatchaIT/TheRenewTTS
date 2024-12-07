@@ -1,4 +1,4 @@
-[![development status | 7 - Inactive](https://img.shields.io/badge/Development_Status-7_--_Inactive-orange)](https://pypi.org/classifiers/)
+[![development status | 5 - Production](https://img.shields.io/badge/Development_Status-5_--_Production-green)](https://pypi.org/classifiers/)
 [![code style: pep-008](https://img.shields.io/badge/code_style-pep--0008-FFF8FF)](https://peps.python.org/pep-0008/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 ![release](https://img.shields.io/github/v/release/PatchaIT/TheRenewTTS)
