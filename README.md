@@ -193,7 +193,7 @@ Note for Custom TTS:
 - 2023/12/03 v1.1.0 -
   - Fixed issue with sometimes custom settings not correctly loaded
   - Thanks Chidinma for testing!
-- 202x/xx/xx v1.1.1 -
+- 2025/xx/xx v1.1.1 -
   - Final fixing issue with sometimes custom settings not correctly loaded
   - Possibility to manually set channel/streamer name
 
