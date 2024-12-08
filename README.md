@@ -69,16 +69,19 @@ Note:
   because all releases use new lib versions.
 
 Note for Save Settings:  
- Sometimes Streamlabs Chatbot doesn't trigger ReloadSettings method on new
+ Sometimes Streamlabs Chatbot doesn't trigger `ReloadSettings` method on new
   settings save from Save Settings GUI button.
- If you can't hear TTS say the "Configuration updated successfully" sentence
-  (by default "Configuration updated successfully") probably new settings are
-  saved, but you can't be sure if they're already loaded / applied into
-  current Chatbot session.
+ 
+ If you can't hear TTS say the `Configuration updated successfully` sentence
+  (by default `Configuration updated successfully`) probably new settings
+  are saved, but you can't be sure if they're already reloaded and applied
+  into current Chatbot session.
+ 
  In this case I'd suggest you to shut down and restart the Chatbot,
   or at least to refresh scripts from Scripts screen (the circle arrow icon
   on the top right).
  After that, make some checks to see if new settings are actually applied.
+ 
  Anyway, after every Chatbot start or reboot, I always suggest to refresh
   scripts at least once.
 
@@ -93,10 +96,10 @@ Note for Custom TTS:
 - Script: The ReNew TTS script
 - Version: 1.1.1-SNAPSHOT
 - Description: Text to speech with Google translate voice,
-   or your own custom TTS webservice
+      or your own custom TTS webservice
 - Change: Final fixing issue with sometimes custom settings
-           not correctly loaded;
-       Possibility to manually set channel/streamer name
+      not correctly loaded;
+    Possibility to manually set channel/streamer name
 - Services: Twitch, Youtube
 - Overlays: None
 - Made By: @Patcha_it
