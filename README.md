@@ -1,8 +1,8 @@
-[![development status | 1 - Planning](https://img.shields.io/badge/Development_Status-1_--_Planning-yellow)](https://pypi.org/classifiers/)
+[![development status | 1 - Planning](https://img.shields.io/badge/development_status-1_--_Planning-yellow)](https://pypi.org/classifiers/)
 [![code style: pep-008](https://img.shields.io/badge/code_style-pep--0008-FFF8FF)](https://peps.python.org/pep-0008/)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![license: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 ![release](https://img.shields.io/github/v/release/PatchaIT/TheRenewTTS)
-![version](https://img.shields.io/github/v/tag/PatchaIT/TheRenewTTS)
+[![next](https://img.shields.io/badge/next-v1.1.1-yellow)](https://github.com/PatchaIT/TheRenewTTS/tree/therenewtts_v1.1.1)
 ___
 <h1 align="center">
 TheRenewTTS
