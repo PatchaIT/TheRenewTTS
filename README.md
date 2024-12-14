@@ -119,7 +119,7 @@ Note for Custom TTS:
   * Added a skip command
   * Fixed sometimes skipping messages
   * Fixed script stopped working suddenly
-* 2020/10/05 v2.1.0 -
+* 2020/10/05 v2.1.0
   * Added a clean repeated words/emotes option
   * Added a clean repeated letters option
   * Added a clean and replace links option
@@ -190,7 +190,7 @@ Note for Custom TTS:
   * Flag to preview textually in chat the reading text
   * Channel owner doesn't need to pay anymore to use TTS
   * Possibility to allow choosing TTS language into chat command
-* 2023/12/03 v1.1.0 -
+* 2023/12/03 v1.1.0
   * Fixed issue with sometimes custom settings not correctly loaded
   * Thanks Chidinma for testing!
 * 2025/xx/xx v1.1.1 * SNAPSHOT
