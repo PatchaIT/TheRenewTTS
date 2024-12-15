@@ -288,14 +288,14 @@
     "cmd_skipnext": {
         "type": "textbox",
         "value": "!ttskipnext",
-        "label": "Skip next text command in queue, without need the current one ends up.",
+        "label": "Skip next text command in queue, without need the current one ends up",
         "tooltip": "Use this command to skip the next text queue, in case of a troll, without need to wait the current one ends up.",
         "group": "Moderator commands"
     },
     "cmd_skipall": {
         "type": "textbox",
         "value": "!ttskipall",
-        "label": "Skip the whole text command queue, and start a new one.",
+        "label": "Skip the whole text command queue, and start a new one",
         "tooltip": "Use this command to skip the whole texts queue, for any reason, like going to close the session.",
         "group": "Moderator commands"
     },

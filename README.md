@@ -1,6 +1,6 @@
 # TheRenewTTS
 
-[![development status | 1 - Planning](https://img.shields.io/badge/development_status-1_--_planning-yellow)](https://pypi.org/classifiers/)
+[![development status | 1 - planning](https://img.shields.io/badge/development_status-1_--_planning-yellow)](https://pypi.org/classifiers/)
 [![code style: pep-008](https://img.shields.io/badge/code_style-pep--0008-FFF8FF)](https://peps.python.org/pep-0008/)
 [![license: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 ![release](https://img.shields.io/github/v/release/PatchaIT/TheRenewTTS)
