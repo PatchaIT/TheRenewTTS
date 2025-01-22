@@ -196,6 +196,7 @@ Note for Custom TTS:
 * 2025/xx/xx v1.1.1 * SNAPSHOT
   * Final fixing issue with sometimes custom settings not correctly loaded
   * Possibility to manually set channel/streamer name
+  * If dll audio source is busy, it will retry until a timeout
 
 ## Getting Started
 
